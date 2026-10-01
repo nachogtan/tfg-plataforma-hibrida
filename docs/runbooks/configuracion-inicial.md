@@ -1,3 +1,14 @@
+---
+title: "Runbook: Configuración inicial"
+tags: [runbook, proxmox, prerrequisitos]
+---
+
+# Runbook: Configuración inicial
+
+↑ [[docs/README|Mapa del repositorio]] · Siguiente: [[puesta-en-marcha]]
+
+Pasos manuales que se realizan **una sola vez** antes del primer despliegue.
+
 ## 1. Usuario y token de API para Terraform
 
 Terraform se conecta a Proxmox mediante su API con un usuario dedicado y un token,
@@ -81,3 +92,8 @@ pveum user token add terraform-prov@pve terraform --privsep 0
 ```
 
 Actualizar después el secreto en `.env`.
+
+## Relacionado
+
+- Siguiente paso: [[puesta-en-marcha]]
+- Diario: [[2026-10-01]]
