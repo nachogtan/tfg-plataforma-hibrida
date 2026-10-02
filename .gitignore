@@ -7,3 +7,12 @@
 # Editor (Obsidian)
 .obsidian/
 .claudian/
+
+# Terraform
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+*.auto.tfvars
+!*.auto.tfvars.example
