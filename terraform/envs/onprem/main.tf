@@ -6,3 +6,20 @@ module "debian_image" {
   url       = "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2"
   file_name = "debian-13-genericcloud-amd64.qcow2"
 }
+
+# VMs on-prem: una por cada entrada del mapa var.vms (terraform.tfvars)
+module "vms" {
+  source   = "../../modules/proxmox-vm"
+  for_each = var.vms
+
+  name           = each.key
+  node_name      = var.proxmox_node
+  image_id       = module.debian_image.id
+  cores          = each.value.cores
+  memory         = each.value.memory
+  disk_size      = each.value.disk_size
+  ipv4_address   = each.value.ip
+  ipv4_gateway   = var.gateway
+  tags           = ["terraform", each.value.role]
+  ssh_public_key = var.ssh_public_key
+}
