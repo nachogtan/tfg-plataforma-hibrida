@@ -9,6 +9,58 @@ tags: [runbook, proxmox, prerrequisitos]
 
 Pasos manuales que se realizan **una sola vez** antes del primer despliegue.
 
+## 0. Requisitos previos
+
+### 0.1 Equipo de administración
+
+Herramientas necesarias: `git`, `terraform`, `ansible`, `kubectl`, `sops`, `age`, `make` y `pre-commit`.
+
+En Fedora:
+
+```bash
+sudo dnf install git ansible make pre-commit
+```
+
+> Terraform, kubectl, SOPS y age se instalan desde sus repositorios oficiales.
+
+Tras clonar el repositorio, activar pre-commit (se guarda en `.git/hooks/`, que no se versiona,
+por lo que hay que repetirlo en cada clon):
+
+```bash
+pre-commit install
+pre-commit run --all-files
+```
+
+### 0.2 Proxmox VE
+
+- Proxmox VE 9.x instalado y accesible por red.
+- Almacenamiento `local` con el tipo de contenido `import` (para las imágenes cloud).
+- Almacenamiento `local-lvm` con el tipo de contenido `images` (para los discos de las VMs).
+- Bridge `vmbr0` activo y conectado a la red local.
+
+Verificación en el nodo:
+
+```bash
+cat /etc/pve/storage.cfg
+ip -br addr | grep vmbr
+```
+
+### 0.3 Red
+
+| Elemento | Valor |
+|---|---|
+| Red | `192.168.1.0/24` |
+| Puerta de enlace | `192.168.1.1` |
+| Nodo Proxmox | `192.168.1.90` |
+| Bloque reservado para la plataforma | `192.168.1.100` – `192.168.1.119` |
+| Rango DHCP del router | a partir de `192.168.1.120` |
+
+Las VMs usan IP fija dentro del bloque reservado. Antes de asignar una IP nueva, comprobar que está libre:
+
+```bash
+ping -c 2 -W 1 <IP>
+```
+
 ## 1. Usuario y token de API para Terraform
 
 Terraform se conecta a Proxmox mediante su API con un usuario dedicado y un token,
@@ -60,6 +112,8 @@ export PROXMOX_VE_INSECURE=true
 
 > `PROXMOX_VE_INSECURE=true` es necesario mientras Proxmox use su certificado
 > autofirmado. Mejora pendiente: certificado válido y eliminar esta variable.
+> El token debe incluir sus tres partes: `usuario@realm!id_token=secreto`.
+> Si solo se pone el secreto, Terraform devuelve `the API token must be in the format 'USER@REALM!TOKENID=UUID'`.
 
 Proteger el archivo, comprobar que Git lo ignora y cargar las variables:
 
@@ -97,3 +151,4 @@ Actualizar después el secreto en `.env`.
 
 - Siguiente paso: [[puesta-en-marcha]]
 - Diario: [[2026-10-01]]
+- Diario: [[2026-10-01]] · [[2026-10-02]]
