@@ -1,0 +1,8 @@
+# Gestionado por Ansible (rol hardening). No editar a mano.
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+MaxAuthTries {{ hardening_ssh_max_auth_tries }}
+X11Forwarding no
+AllowUsers {{ hardening_ssh_allow_users | join(' ') }}

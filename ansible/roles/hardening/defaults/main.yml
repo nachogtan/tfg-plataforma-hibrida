@@ -1,0 +1,7 @@
+---
+# Usuarios autorizados a entrar por SSH
+hardening_ssh_allow_users:
+  - admin
+
+# Intentos de autenticación por conexión
+hardening_ssh_max_auth_tries: 3
