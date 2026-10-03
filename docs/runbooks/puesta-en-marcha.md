@@ -56,13 +56,31 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
 
 ## Fase 3: Configuración (Ansible)
 
-1. Ejecutar el playbook principal [site.yml](../../ansible/playbooks/site.yml) en cada entorno:
+> Implementado: playbook `base.yml` (roles `common` y `hardening`).
+> Pendiente: `core.yml`, `k3s.yml` y `site.yml`.
+
+1. Ensayar los cambios sin aplicarlos (desde `ansible/`):
 ```bash
-   ansible-playbook -i ansible/inventories/onprem/hosts.yml ansible/playbooks/site.yml
-   ansible-playbook -i ansible/inventories/cloud/hosts.yml  ansible/playbooks/site.yml
+   ansible-playbook playbooks/base.yml --check --diff
 ```
-   Este playbook aplica [base.yml](../../ansible/playbooks/base.yml) → [core.yml](../../ansible/playbooks/core.yml) → [k3s.yml](../../ansible/playbooks/k3s.yml).
-2. Recuperar el `kubeconfig` del servidor k3s y verificar: `kubectl get nodes`.
+2. Si el cambio afecta a SSH, abrir antes una sesión en la VM como red de seguridad:
+```bash
+   ssh admin@<IP_VM>
+```
+3. Aplicar la configuración base:
+```bash
+   ansible-playbook playbooks/base.yml
+```
+   Una segunda ejecución debe terminar con `changed=0` (idempotencia).
+4. Verificar el hardening de SSH:
+```bash
+   ssh admin@<IP_VM> "echo SSH_OK"            # debe funcionar
+   ssh root@<IP_VM> "echo NO_DEBERIA_ENTRAR"  # debe fallar: Permission denied
+```
+5. Si es la primera vez, activar el agente QEMU en Terraform (`agent.enabled = true`) y comprobarlo:
+```bash
+   ssh root@192.168.1.90 "qm agent <VMID> ping"
+```
 
 ## Fase 4: GitOps (Argo CD)
 
