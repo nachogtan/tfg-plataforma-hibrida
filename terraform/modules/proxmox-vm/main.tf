@@ -15,7 +15,7 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   # La imagen genericcloud no incluye el agente QEMU; se activará con Ansible más adelante
   agent {
-    enabled = false
+    enabled = true
   }
 
   cpu {
