@@ -147,6 +147,24 @@ pveum user token add terraform-prov@pve terraform --privsep 0
 
 Actualizar después el secreto en `.env`.
 
+### 1.5 Permisos sobre el almacenamiento de imágenes
+
+Terraform necesita borrar imágenes del almacenamiento `local` al ejecutar `destroy`
+(`Datastore.Allocate`). Ese permiso se concede **solo en esa ruta**, no en todo Proxmox:
+
+```bash
+pveum role add TerraformStorage -privs "Datastore.Allocate Datastore.AllocateSpace Datastore.AllocateTemplate Datastore.Audit"
+pveum aclmod /storage/local -user terraform-prov@pve -role TerraformStorage
+```
+
+Verificación:
+
+```bash
+pveum user permissions terraform-prov@pve --path /storage/local | grep Datastore
+```
+
+Deben aparecer cuatro permisos, incluido `Datastore.Allocate`.
+
 ## Relacionado
 
 - Siguiente paso: [[puesta-en-marcha]]
