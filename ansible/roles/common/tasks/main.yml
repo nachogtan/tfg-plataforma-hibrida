@@ -18,3 +18,8 @@
     name: unattended-upgrades
     enabled: true
     state: started
+
+- name: Arrancar el agente QEMU
+  ansible.builtin.systemd_service:
+    name: qemu-guest-agent
+    state: started
