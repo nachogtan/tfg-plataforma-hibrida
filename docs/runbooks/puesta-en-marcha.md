@@ -45,6 +45,15 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
    ssh admin@<IP_VM>
 ```
 5. Comprobar la idempotencia: un segundo `plan` debe indicar `No changes`.
+6. Si se ha recreado una VM con la misma IP, eliminar su huella SSH anterior:
+```bash
+   ssh-keygen -R <IP_VM>
+```
+
+> [!warning] Problema conocido
+> Con el agente QEMU activado, `apply` espera hasta 15 minutos a que el agente responda en VMs nuevas,
+> y termina con un aviso (`timeout while waiting for the QEMU agent`). La VM se crea correctamente.
+> Pendiente de corregir instalando el agente con cloud-init.
 
 ## Fase 2: Generación del inventario
 
