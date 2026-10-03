@@ -1,0 +1,12 @@
+---
+# Zona horaria del sistema
+common_timezone: Europe/Madrid
+
+# Paquetes base presentes en todas las VMs
+common_packages:
+  - qemu-guest-agent
+  - curl
+  - ca-certificates
+  - htop
+  - vim
+  - unattended-upgrades

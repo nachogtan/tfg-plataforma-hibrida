@@ -1,0 +1,6 @@
+---
+- name: Configuración base de todas las VMs
+  hosts: all
+  become: true
+  roles:
+    - common
