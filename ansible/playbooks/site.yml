@@ -1,0 +1,7 @@
+---
+# Playbook principal: configuración completa de la plataforma
+- name: Configuración base
+  ansible.builtin.import_playbook: base.yml
+
+- name: Clúster k3s
+  ansible.builtin.import_playbook: k3s.yml

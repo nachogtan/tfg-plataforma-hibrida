@@ -1,0 +1,6 @@
+---
+- name: Instalación del clúster k3s
+  hosts: k3s
+  become: true
+  roles:
+    - k3s
