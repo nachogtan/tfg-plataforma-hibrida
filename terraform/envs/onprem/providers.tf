@@ -9,6 +9,17 @@ terraform {
   }
 }
 
-# Las credenciales se leen de las variables de entorno definidas en .env:
+# Las credenciales de la API se leen de .env:
 # PROXMOX_VE_ENDPOINT, PROXMOX_VE_API_TOKEN y PROXMOX_VE_INSECURE
-provider "proxmox" {}
+provider "proxmox" {
+  # SSH solo se usa para subir snippets de cloud-init (la API no lo permite)
+  ssh {
+    agent    = true
+    username = "root"
+
+    node {
+      name    = "ngtn-server"
+      address = "192.168.1.90"
+    }
+  }
+}
