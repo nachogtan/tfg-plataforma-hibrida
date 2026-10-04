@@ -1,0 +1,8 @@
+---
+# Versión fijada de k3s (reproducibilidad)
+k3s_version: v1.36.5+k3s1
+
+# Argumentos del servidor k3s
+k3s_server_args:
+  - --disable=traefik
+  - --tls-san={{ ansible_host }}
