@@ -71,3 +71,9 @@ variable "ssh_public_key" {
   description = "Clave SSH pública autorizada para el usuario"
   type        = string
 }
+
+variable "vendor_data_file_id" {
+  description = "ID del snippet de cloud-init (vendor-data) con configuración común; null si no se usa"
+  type        = string
+  default     = null
+}
