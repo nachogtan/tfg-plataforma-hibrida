@@ -22,3 +22,22 @@
   ansible.builtin.command: >
     k3s kubectl wait --for=condition=Ready node/{{ inventory_hostname }} --timeout=180s
   changed_when: false
+
+
+
+- name: Leer el kubeconfig del nodo
+  ansible.builtin.slurp:
+    src: /etc/rancher/k3s/k3s.yaml
+  register: k3s_kubeconfig_remote
+  run_once: true
+
+- name: Escribir el kubeconfig en el equipo de administración (con la IP del nodo)
+  ansible.builtin.copy:
+    content: >-
+      {{ k3s_kubeconfig_remote.content | b64decode
+         | regex_replace('https://127\.0\.0\.1:6443', 'https://' ~ ansible_host ~ ':6443') }}
+    dest: "{{ k3s_kubeconfig_local }}"
+    mode: "0600"
+  delegate_to: localhost
+  become: false
+  run_once: true

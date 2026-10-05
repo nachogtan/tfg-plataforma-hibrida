@@ -6,3 +6,7 @@ k3s_version: v1.36.5+k3s1
 k3s_server_args:
   - --disable=traefik
   - --tls-san={{ ansible_host }}
+
+
+# Ruta del kubeconfig en el equipo de administración (fuera del repositorio)
+k3s_kubeconfig_local: "{{ lookup('env', 'HOME') }}/.kube/tfg-onprem.yaml"
