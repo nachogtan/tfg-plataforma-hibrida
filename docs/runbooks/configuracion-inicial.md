@@ -31,6 +31,12 @@ pre-commit install
 pre-commit run --all-files
 ```
 
+Variable para usar el clúster con `kubectl` (se recomienda añadirla a `~/.bashrc`):
+
+```bash
+export KUBECONFIG=~/.kube/tfg-onprem.yaml
+```
+
 ### 0.2 Proxmox VE
 
 - Proxmox VE 9.x instalado y accesible por red.

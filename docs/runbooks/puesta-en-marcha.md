@@ -63,8 +63,8 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
 
 ### Fase 3: Configuración (Ansible)
 
-> Implementado: `base.yml` (roles `common` y `hardening`), `k3s.yml` (rol `k3s`) y `site.yml`.
-> Pendiente: `core.yml`.
+> Implementado: `base.yml` (roles `common` y `hardening` con firewall UFW), `k3s.yml` (rol `k3s` con
+> reglas de firewall y kubeconfig local) y `site.yml`. Pendiente: `core.yml`.
 
 1. Si el cambio afecta a SSH, abrir antes una sesión en la VM como red de seguridad.
 2. Aplicar la configuración completa (desde `ansible/`):
@@ -77,11 +77,19 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
    ssh admin@<IP_VM> "echo SSH_OK"            # debe funcionar
    ssh root@<IP_VM> "echo NO_DEBERIA_ENTRAR"  # debe fallar: Permission denied
 ```
-4. Verificar el clúster:
+4. Verificar el clúster desde el equipo de administración (el rol `k3s` copia el kubeconfig a
+   `~/.kube/tfg-onprem.yaml`):
 ```bash
-   ssh admin@<IP_K3S> "sudo k3s kubectl get nodes -o wide"
+   export KUBECONFIG=~/.kube/tfg-onprem.yaml
+   kubectl get nodes
+   kubectl get pods -A
 ```
-   Todos los nodos deben estar en `Ready` y no debe haber pods de Traefik en `kube-system`.
+   Todos los nodos deben estar en `Ready`, los pods de `kube-system` en `Running` y no debe haber pods de Traefik.
+5. Verificar el firewall:
+```bash
+   ssh admin@<IP_VM> "sudo ufw status"
+   nc -zv -w 3 <IP_K3S> 10250    # debe fallar (TIMEOUT): puerto no permitido
+```
 
 ## Fase 4: GitOps (Argo CD)
 
@@ -97,5 +105,5 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
 
 ## Relacionado
 
-- [[configuracion-inicial]] · [[añadir-nodo]] · [[restauracion]]
-- Diario: [[2026-10-01]] · [[2026-10-02]]
+- [[configuracion-inicial]] · [[añadir-nodo]] · [[restauracion]] . [[2026-10-05-reconstruccion-3]]
+- Diario: [[2026-10-01]] · [[2026-10-02]] . [[2026-10-05]]
