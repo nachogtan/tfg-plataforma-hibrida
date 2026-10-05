@@ -7,6 +7,11 @@ k3s_server_args:
   - --disable=traefik
   - --tls-san={{ ansible_host }}
 
-
 # Ruta del kubeconfig en el equipo de administración (fuera del repositorio)
 k3s_kubeconfig_local: "{{ lookup('env', 'HOME') }}/.kube/tfg-onprem.yaml"
+
+# Reglas de firewall para k3s (documentación oficial de k3s para Debian/UFW)
+k3s_firewall_rules:
+  - { port: "6443", proto: tcp, comment: "k3s: API de Kubernetes" }
+  - { src: "10.42.0.0/16", comment: "k3s: red de pods" }
+  - { src: "10.43.0.0/16", comment: "k3s: red de servicios" }

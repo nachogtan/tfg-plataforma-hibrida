@@ -11,3 +11,32 @@
 - name: Validar la configuración de SSH
   ansible.builtin.command: sshd -t
   changed_when: false
+
+
+- name: Firewall (UFW)
+  when: hardening_firewall_enabled
+  block:
+    - name: Instalar UFW
+      ansible.builtin.apt:
+        name: ufw
+        state: present
+
+    - name: Permitir los puertos comunes (antes de activar el firewall)
+      community.general.ufw:
+        rule: allow
+        port: "{{ item.port }}"
+        proto: "{{ item.proto }}"
+        comment: "{{ item.comment }}"
+      loop: "{{ hardening_firewall_allowed }}"
+
+    - name: Política por defecto (entrada denegada, salida permitida)
+      community.general.ufw:
+        default: "{{ item.policy }}"
+        direction: "{{ item.direction }}"
+      loop:
+        - { direction: incoming, policy: deny }
+        - { direction: outgoing, policy: allow }
+
+    - name: Activar el firewall
+      community.general.ufw:
+        state: enabled

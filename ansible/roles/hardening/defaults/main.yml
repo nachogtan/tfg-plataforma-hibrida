@@ -5,3 +5,9 @@ hardening_ssh_allow_users:
 
 # Intentos de autenticación por conexión
 hardening_ssh_max_auth_tries: 3
+
+
+# Firewall (UFW): política por defecto y puertos abiertos en todas las VMs
+hardening_firewall_enabled: true
+hardening_firewall_allowed:
+  - { port: "22", proto: tcp, comment: "SSH" }
