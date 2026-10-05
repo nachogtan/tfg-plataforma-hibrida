@@ -24,8 +24,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Automatización y comodidad
 
-- [ ] Automatizar la carga de `.env` (direnv o Makefile).
-- [ ] Rellenar el `Makefile` con los comandos del runbook.
+
 
 ## Documentación
 
@@ -33,9 +32,13 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Revisar `arquitectura.md`, `docs/README.md`, ADR-0001 y los runbooks de añadir nodo y restauración.
 - [ ] Documentar el plan de IPs en `arquitectura.md`.
 - [ ] Revisión general de formato del repositorio antes de la entrega.
+- [ ] Añadir el texto de la licencia en `LICENSE` (por ejemplo, MIT).
 
 ## Completados
 
 - [x] Reglas de `.gitignore` para `kubeconfig*`, `*.key` y `*.pem`. (2026-10-05)
 - [x] Firewall en el rol `hardening` con los puertos de k3s. (2026-10-05)
 - [x] Instalar el agente QEMU con cloud-init. (2026-10-04)
+- [x] Makefile con los comandos del runbook y carga automática de `.env`. (2026-10-05)
+- [x] README.md del proyecto y `.env.example`. (2026-10-05)
+- [x] Limpieza automática de huellas SSH al recrear VMs (`make inventory`). (2026-10-05)
