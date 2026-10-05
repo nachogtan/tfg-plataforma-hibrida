@@ -25,9 +25,10 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
 
 > On-prem implementado. Entorno cloud pendiente.
 
-1. Cargar las credenciales de Proxmox:
+1. Cargar las credenciales de Proxmox y la clave SSH (el provider la usa para subir snippets):
 ```bash
    source .env
+   ssh-add ~/.ssh/id_ed25519
 ```
 2. Revisar las VMs a crear en [terraform.tfvars](../../terraform/envs/onprem/terraform.tfvars) (mapa `vms`).
 3. Inicializar y aplicar el entorno on-prem ([envs/onprem](../../terraform/envs/onprem/main.tf)):
@@ -37,23 +38,20 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
    terraform -chdir=terraform/envs/onprem apply
 ```
    Terraform descarga la imagen oficial de Debian 13 *genericcloud* en `local`
-   (módulo [proxmox-image](../../terraform/modules/proxmox-image/main.tf)) y crea una VM por cada
-   entrada del mapa `vms` (módulo [proxmox-vm](../../terraform/modules/proxmox-vm/main.tf)),
-   inicializada con cloud-init (IP fija, usuario `admin` y clave SSH).
-4. Comprobar el acceso a cada VM:
-```bash
-   ssh admin@<IP_VM>
-```
-5. Comprobar la idempotencia: un segundo `plan` debe indicar `No changes`.
-6. Si se ha recreado una VM con la misma IP, eliminar su huella SSH anterior:
+   (módulo [proxmox-image](../../terraform/modules/proxmox-image/main.tf)), crea el snippet de
+   cloud-init `vendor-data-base.yaml` (instala el agente QEMU en el primer arranque) y crea una VM
+   por cada entrada del mapa `vms` (módulo [proxmox-vm](../../terraform/modules/proxmox-vm/main.tf)),
+   inicializada con IP fija, usuario `admin` y clave SSH.
+4. Si se ha recreado una VM con la misma IP, eliminar su huella SSH anterior:
 ```bash
    ssh-keygen -R <IP_VM>
 ```
-
-> [!warning] Problema conocido
-> Con el agente QEMU activado, `apply` espera hasta 15 minutos a que el agente responda en VMs nuevas,
-> y termina con un aviso (`timeout while waiting for the QEMU agent`). La VM se crea correctamente.
-> Pendiente de corregir instalando el agente con cloud-init.
+5. Comprobar el acceso a cada VM y que el agente QEMU responde:
+```bash
+   ssh admin@<IP_VM> "hostname"
+   ssh root@192.168.1.90 "qm agent <VMID> ping && echo AGENTE_OK"
+```
+6. Comprobar la idempotencia: un segundo `plan` debe indicar `No changes`.
 
 ## Fase 2: Generación del inventario
 
@@ -63,33 +61,27 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
    ansible -i ansible/inventories/onprem/hosts.yml all -m ping
 ```
 
-## Fase 3: Configuración (Ansible)
+### Fase 3: Configuración (Ansible)
 
-> Implementado: playbook `base.yml` (roles `common` y `hardening`).
-> Pendiente: `core.yml`, `k3s.yml` y `site.yml`.
+> Implementado: `base.yml` (roles `common` y `hardening`), `k3s.yml` (rol `k3s`) y `site.yml`.
+> Pendiente: `core.yml`.
 
-1. Ensayar los cambios sin aplicarlos (desde `ansible/`):
+1. Si el cambio afecta a SSH, abrir antes una sesión en la VM como red de seguridad.
+2. Aplicar la configuración completa (desde `ansible/`):
 ```bash
-   ansible-playbook playbooks/base.yml --check --diff
+   ansible-playbook playbooks/site.yml
 ```
-2. Si el cambio afecta a SSH, abrir antes una sesión en la VM como red de seguridad:
-```bash
-   ssh admin@<IP_VM>
-```
-3. Aplicar la configuración base:
-```bash
-   ansible-playbook playbooks/base.yml
-```
-   Una segunda ejecución debe terminar con `changed=0` (idempotencia).
-4. Verificar el hardening de SSH:
+   Una segunda ejecución debe terminar con `changed=0`.
+3. Verificar el hardening de SSH:
 ```bash
    ssh admin@<IP_VM> "echo SSH_OK"            # debe funcionar
    ssh root@<IP_VM> "echo NO_DEBERIA_ENTRAR"  # debe fallar: Permission denied
 ```
-5. Si es la primera vez, activar el agente QEMU en Terraform (`agent.enabled = true`) y comprobarlo:
+4. Verificar el clúster:
 ```bash
-   ssh root@192.168.1.90 "qm agent <VMID> ping"
+   ssh admin@<IP_K3S> "sudo k3s kubectl get nodes -o wide"
 ```
+   Todos los nodos deben estar en `Ready` y no debe haber pods de Traefik en `kube-system`.
 
 ## Fase 4: GitOps (Argo CD)
 

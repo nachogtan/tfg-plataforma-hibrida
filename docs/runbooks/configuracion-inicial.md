@@ -34,11 +34,34 @@ pre-commit run --all-files
 ### 0.2 Proxmox VE
 
 - Proxmox VE 9.x instalado y accesible por red.
-- Almacenamiento `local` con el tipo de contenido `import` (para las imágenes cloud).
+- Almacenamiento `local` con los tipos de contenido `import` (imágenes cloud) y `snippets`
+  (configuración de cloud-init):
+```bash
+  pvesh set /storage/local --content iso,vztmpl,backup,import,snippets
+```
+  > `--content` sustituye la lista completa: incluir siempre los tipos existentes.
 - Almacenamiento `local-lvm` con el tipo de contenido `images` (para los discos de las VMs).
 - Bridge `vmbr0` activo y conectado a la red local.
+- Acceso SSH como root con clave desde el equipo de administración. El provider de Terraform lo usa
+  para subir snippets (la API de Proxmox no lo permite). La clave debe estar cargada con `ssh-add`.
+  > Mejora pendiente: usuario SSH dedicado con permisos mínimos.
 
 Verificación en el nodo:
+
+```bash
+cat /etc/pve/storage.cfg
+ip -br addr | grep vmbr
+```
+
+En `storage.cfg`, la línea `content` de `local` debe incluir `import` y `snippets`.
+
+Verificación del acceso SSH desde el equipo de administración:
+
+```bash
+ssh root@192.168.1.90 "hostname"
+```
+
+Debe responder con el nombre del nodo sin pedir contraseña (más allá de la de la clave, si no está cargada).
 
 ```bash
 cat /etc/pve/storage.cfg
