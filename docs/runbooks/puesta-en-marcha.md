@@ -21,6 +21,19 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
 - `secrets.auto.tfvars` creado en el entorno cloud a partir de su `.example` (cuando se implemente).
 - Colecciones de Ansible instaladas: `ansible-galaxy install -r ansible/requirements.yml` ([requirements.yml](../../ansible/requirements.yml)).
 
+## Atajos con make
+
+Todo el procedimiento está disponible como objetivos del [Makefile](../../Makefile):
+
+```bash
+make help      # lista de objetivos
+make deploy    # Fases 1–3: Terraform + inventario + Ansible
+make check     # idempotencia de Terraform y Ansible
+make rebuild   # destruye y vuelve a crear la plataforma
+```
+
+Las fases siguientes describen lo que hace cada paso por separado.
+
 ## Fase 1: Provisión (Terraform)
 
 > On-prem implementado. Entorno cloud pendiente.
