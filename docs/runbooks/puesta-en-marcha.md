@@ -74,7 +74,7 @@ Las fases siguientes describen lo que hace cada paso por separado.
    ansible -i ansible/inventories/onprem/hosts.yml all -m ping
 ```
 
-### Fase 3: Configuración (Ansible)
+## Fase 3: Configuración (Ansible)
 
 > Implementado: `base.yml` (roles `common` y `hardening` con firewall UFW), `k3s.yml` (rol `k3s` con
 > reglas de firewall y kubeconfig local) y `site.yml`. Pendiente: `core.yml`.
@@ -104,9 +104,10 @@ Las fases siguientes describen lo que hace cada paso por separado.
    nc -zv -w 3 <IP_K3S> 10250    # debe fallar (TIMEOUT): puerto no permitido
 ```
 
-### Fase 4: GitOps (Argo CD)
+## Fase 4: GitOps (Argo CD)
 
-> Implementado: Argo CD v3.5.3, App of Apps y `demo-app`. Pendiente: componentes de plataforma (Traefik…).
+> Implementado: Argo CD v3.5.3, App of Apps, `demo-app`, Traefik e Ingress con sslip.io.
+> Pendiente: DNS interno y certificados válidos (cert-manager).
 
 1. Ejecutar el bootstrap (incluido en `make deploy`):
 ```bash
@@ -119,15 +120,34 @@ Las fases siguientes describen lo que hace cada paso por separado.
 ```bash
    kubectl -n argocd get applications
 ```
-   Todas deben estar en `Synced` y `Healthy`.
-3. Acceso a la interfaz web (temporal, hasta publicar Argo CD con Traefik):
+   Deben aparecer `root`, `argocd`, `platform`, `traefik` y `demo-app`, todas en `Synced` y `Healthy`.
+   Traefik puede tardar unos minutos: lo despliega `platform` después de que `root` la cree.
+3. Verificar Traefik:
 ```bash
-   kubectl -n argocd port-forward svc/argocd-server 8080:443
+   kubectl -n traefik get svc traefik
+```
+   `EXTERNAL-IP` debe ser la IP del nodo (ServiceLB de k3s), con los puertos `80` y `443`.
+4. Verificar `demo-app` a través del Ingress:
+```bash
+   curl -s http://demo.<IP_K3S>.sslip.io
+```
+   Debe responder `whoami` con el nombre del pod (`Hostname`). Repetir para ver el reparto entre réplicas.
+5. Acceder a la interfaz web de Argo CD en `https://argocd.<IP_K3S>.sslip.io`.
+   Traefik usa un certificado autofirmado: aceptar el aviso del navegador. Usuario `admin`.
+   - Primer acceso tras una instalación nueva: obtener la contraseña inicial.
+```bash
    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
 ```
-   Abrir https://localhost:8080 con el usuario `admin`.
+   - Cambiarla en *User Info → Update Password* y comprobar que el secreto inicial ya no existe
+     (`kubectl -n argocd get secrets`); si sigue, borrarlo con
+     `kubectl -n argocd delete secret argocd-initial-admin-secret`.
+   - Sin Ingress (acceso de emergencia): `kubectl -n argocd port-forward svc/argocd-server 8080:80`
+     y abrir http://localhost:8080.
 
 > Argo CD lee la rama `main` de GitHub: los cambios deben estar fusionados para aplicarse.
+> Los parámetros de `argocd-cmd-params-cm` (por ejemplo, `server.insecure`) solo se leen al arrancar:
+> si se cambian con Argo CD ya en marcha, ejecutar `kubectl -n argocd rollout restart deployment argocd-server`.
+> En una instalación nueva no hace falta, porque ya están presentes desde el principio.
 
 ## Verificación
 

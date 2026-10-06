@@ -21,7 +21,10 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Usuario SSH dedicado con permisos mínimos para Terraform en Proxmox, en lugar de root.
 - [ ] Endurecer el SSH del nodo Proxmox (`PermitRootLogin prohibit-password`, sin contraseñas).
 - [ ] Certificado válido en Proxmox y eliminar `PROXMOX_VE_INSECURE`.
-- [ ] Cambiar la contraseña inicial de `admin` de Argo CD y borrar el secreto `argocd-initial-admin-secret`.
+- [ ] Contraseña de `admin` de Argo CD declarativa (hash en `argocd-secret` cifrado con SOPS), para no
+      tener que cambiarla a mano tras cada reconstrucción.
+- [ ] DNS interno en lugar de sslip.io para los servicios con credenciales (Argo CD, Warpgate…),
+      con certificados válidos emitidos por cert-manager.
 - [ ] Revisar el `ADR-0003` (Kustomize en lugar de Helm, `prune` y `ServerSideApply`).
 
 ## Kubernetes y red
@@ -32,15 +35,14 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Automatización y comodidad
 
-
+- [ ] Activar `git config fetch.prune true` para que las ramas borradas en GitHub desaparezcan
+      también en local.
 
 ## Documentación
 
-- [ ] Completar `README.md` (está vacío) y `LICENSE`.
 - [ ] Revisar `arquitectura.md`, `docs/README.md`, ADR-0001 y los runbooks de añadir nodo y restauración.
 - [ ] Documentar el plan de IPs en `arquitectura.md`.
 - [ ] Revisión general de formato del repositorio antes de la entrega.
-- [ ] Añadir el texto de la licencia en `LICENSE` (por ejemplo, MIT).
 
 ## Completados
 
@@ -53,3 +55,8 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Repositorio público tras escanear el historial con gitleaks y `LICENSE` con derechos reservados. (2026-10-06)
 - [x] GitOps con Argo CD, App of Apps y `demo-app`. (2026-10-06)
 - [x] Bootstrap de Argo CD automatizado en `make deploy`. (2026-10-06)
+- [x] Protección de `main` con ruleset (PR obligatorio, sin force push ni borrado). (2026-10-06)
+- [x] Traefik desplegado por Argo CD y puertos 80/443 en el firewall. (2026-10-06)
+- [x] `demo-app` publicada por Ingress en sslip.io. (2026-10-06)
+- [x] Interfaz de Argo CD por HTTPS a través de Traefik. (2026-10-06)
+- [x] Cambiar la contraseña inicial de `admin` de Argo CD y eliminar `argocd-initial-admin-secret`. (2026-10-06)
