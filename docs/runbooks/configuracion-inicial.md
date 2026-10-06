@@ -13,7 +13,7 @@ Pasos manuales que se realizan **una sola vez** antes del primer despliegue.
 
 ### 0.1 Equipo de administración
 
-Herramientas necesarias: `git`, `terraform`, `ansible`, `kubectl`, `sops`, `age`, `make` y `pre-commit`.
+Herramientas necesarias: `git`, `terraform`, `ansible`, `kubectl`, `sops`, `age`, `make`, `pre-commit` y `podman`.
 
 En Fedora:
 

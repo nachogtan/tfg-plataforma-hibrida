@@ -10,11 +10,19 @@ tags: [pendientes, backlog]
 Lista viva de tareas pendientes y mejoras identificadas durante el proyecto.
 Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
+## Posibles ampliaciones
+
+- [ ] Agente de IA OpenClaw en un namespace aislado: NetworkPolicies (solo salida a la API del LLM),
+      RBAC mínimo, secretos con SOPS, límites de recursos y sin exposición pública.
+- [ ] Versión en inglés de la documentación (`README.md` en inglés y `README.es.md` en español).
+
 ## Seguridad
 
 - [ ] Usuario SSH dedicado con permisos mínimos para Terraform en Proxmox, en lugar de root.
 - [ ] Endurecer el SSH del nodo Proxmox (`PermitRootLogin prohibit-password`, sin contraseñas).
 - [ ] Certificado válido en Proxmox y eliminar `PROXMOX_VE_INSECURE`.
+- [ ] Cambiar la contraseña inicial de `admin` de Argo CD y borrar el secreto `argocd-initial-admin-secret`.
+- [ ] Revisar el `ADR-0003` (Kustomize en lugar de Helm, `prune` y `ServerSideApply`).
 
 ## Kubernetes y red
 
@@ -42,3 +50,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Makefile con los comandos del runbook y carga automática de `.env`. (2026-10-05)
 - [x] README.md del proyecto y `.env.example`. (2026-10-05)
 - [x] Limpieza automática de huellas SSH al recrear VMs (`make inventory`). (2026-10-05)
+- [x] Repositorio público tras escanear el historial con gitleaks y `LICENSE` con derechos reservados. (2026-10-06)
+- [x] GitOps con Argo CD, App of Apps y `demo-app`. (2026-10-06)
+- [x] Bootstrap de Argo CD automatizado en `make deploy`. (2026-10-06)

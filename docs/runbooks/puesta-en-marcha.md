@@ -104,10 +104,30 @@ Las fases siguientes describen lo que hace cada paso por separado.
    nc -zv -w 3 <IP_K3S> 10250    # debe fallar (TIMEOUT): puerto no permitido
 ```
 
-## Fase 4: GitOps (Argo CD)
+### Fase 4: GitOps (Argo CD)
 
-1. Ejecutar [bootstrap.sh](../../scripts/bootstrap.sh), que instala Argo CD ([bootstrap/argocd](../../gitops/bootstrap/argocd/kustomization.yaml)) y aplica [root-app.yaml](../../gitops/bootstrap/root-app.yaml).
-2. Argo CD sincroniza [platform.yaml](../../gitops/appsets/platform.yaml) y [apps.yaml](../../gitops/appsets/apps.yaml).
+> Implementado: Argo CD v3.5.3, App of Apps y `demo-app`. Pendiente: componentes de plataforma (Traefik…).
+
+1. Ejecutar el bootstrap (incluido en `make deploy`):
+```bash
+   make bootstrap
+```
+   Instala Argo CD si no existe ([bootstrap/argocd](../../gitops/bootstrap/argocd/kustomization.yaml))
+   y aplica la [aplicación raíz](../../gitops/bootstrap/root-app.yaml). Si Argo CD ya existe,
+   no lo reinstala: se gestiona a sí mismo desde Git.
+2. Verificar las aplicaciones:
+```bash
+   kubectl -n argocd get applications
+```
+   Todas deben estar en `Synced` y `Healthy`.
+3. Acceso a la interfaz web (temporal, hasta publicar Argo CD con Traefik):
+```bash
+   kubectl -n argocd port-forward svc/argocd-server 8080:443
+   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
+```
+   Abrir https://localhost:8080 con el usuario `admin`.
+
+> Argo CD lee la rama `main` de GitHub: los cambios deben estar fusionados para aplicarse.
 
 ## Verificación
 
@@ -115,6 +135,8 @@ Las fases siguientes describen lo que hace cada paso por separado.
 - [ ] `kubectl -n argocd get applications`: todas en `Synced` / `Healthy`.
 - [ ] Grafana muestra las métricas de `node_exporter` de todos los hosts.
 - [ ] `demo-app` accesible por Ingress con certificado TLS válido.
+- [ ] Un cambio fusionado en `gitops/apps/` se aplica solo en menos de 3 minutos.
+- [ ] Un cambio manual en el clúster es revertido por Argo CD (`selfHeal`).
 
 ## Relacionado
 
