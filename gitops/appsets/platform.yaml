@@ -1,0 +1,22 @@
+# Componentes de plataforma: recoge el application.yaml de cada carpeta de gitops/platform/
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/nachogtan/tfg-plataforma-hibrida.git
+    targetRevision: main
+    path: gitops/platform
+    directory:
+      recurse: true
+      include: "*/application.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

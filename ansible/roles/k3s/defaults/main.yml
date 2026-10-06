@@ -15,3 +15,5 @@ k3s_firewall_rules:
   - { port: "6443", proto: tcp, comment: "k3s: API de Kubernetes" }
   - { src: "10.42.0.0/16", comment: "k3s: red de pods" }
   - { src: "10.43.0.0/16", comment: "k3s: red de servicios" }
+  - { port: "80", proto: tcp, comment: "Ingress: HTTP (Traefik)" }
+  - { port: "443", proto: tcp, comment: "Ingress: HTTPS (Traefik)" }
