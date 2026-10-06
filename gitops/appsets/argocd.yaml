@@ -1,20 +1,21 @@
-# Aplicación raíz (patrón App of Apps): se aplica una sola vez en el bootstrap.
-# Despliega todo lo que hay en gitops/appsets/.
+# Argo CD se gestiona a sí mismo desde Git (versión fijada en bootstrap/argocd)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root
+  name: argocd
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/nachogtan/tfg-plataforma-hibrida.git
     targetRevision: main
-    path: gitops/appsets
+    path: gitops/bootstrap/argocd
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
   syncPolicy:
     automated:
-      prune: true
+      prune: false
       selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
