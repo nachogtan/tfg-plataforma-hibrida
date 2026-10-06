@@ -1,0 +1,23 @@
+# Publica la interfaz de Argo CD a través de Traefik.
+# Traefik termina el TLS (certificado autofirmado por defecto)
+# y reenvía el tráfico por HTTP a argocd-server dentro del clúster.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: argocd.192.168.1.101.sslip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  number: 80

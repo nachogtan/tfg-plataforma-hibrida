@@ -1,0 +1,7 @@
+# El TLS lo termina Traefik; argocd-server sirve HTTP dentro del clúster
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cmd-params-cm
+data:
+  server.insecure: "true"
