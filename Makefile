@@ -4,7 +4,7 @@
 SHELL := /bin/bash
 .RECIPEPREFIX = >
 .DEFAULT_GOAL := help
-.PHONY: help init plan apply destroy inventory ping configure deploy rebuild check status
+.PHONY: help init plan apply destroy inventory ping configure deploy rebuild check status bootstrap
 
 ENV        ?= onprem
 TF_DIR     := terraform/envs/$(ENV)
@@ -37,7 +37,7 @@ ping: ## Comprueba la conexión de Ansible con todas las VMs
 configure: ## Configura todas las VMs (playbook site.yml)
 > $(ANSIBLE) ansible-playbook playbooks/site.yml
 
-deploy: apply inventory ping configure ## Despliegue completo: Terraform + inventario + Ansible
+deploy: apply inventory ping configure bootstrap ## Despliegue completo: Terraform + inventario + Ansible + GitOps
 
 rebuild: destroy deploy ## Destruye y vuelve a crear toda la plataforma
 
@@ -47,3 +47,6 @@ check: ## Comprueba la idempotencia (Terraform y Ansible sin cambios)
 
 status: ## Estado del clúster k3s
 > KUBECONFIG=$$HOME/.kube/tfg-onprem.yaml kubectl get nodes,pods -A
+
+bootstrap: ## Arranque de GitOps: instala Argo CD y aplica la aplicación raíz
+> scripts/bootstrap.sh
