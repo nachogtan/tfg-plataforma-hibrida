@@ -1,9 +1,10 @@
-# Instalación de Argo CD a partir del manifiesto oficial, con versión fijada.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-
 namespace: argocd
-
 resources:
   - namespace.yaml
+  - ingress.yaml
   - https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.3/manifests/install.yaml
+
+patches:
+  - path: argocd-cmd-params-cm.yaml
