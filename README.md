@@ -53,6 +53,7 @@ Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md).
 ## Seguridad
 
 - Credenciales fuera del repositorio (`.env`, kubeconfig en `~/.kube/`) y detección de secretos con pre-commit.
+- CI sin credenciales en cada PR (gitleaks sobre todo el historial y hooks de pre-commit), obligatoria para fusionar en `main`.
 - Token de API de Proxmox con permisos mínimos; permisos de borrado limitados al almacenamiento de imágenes.
 - SSH solo con clave pública, sin acceso de `root` ni contraseñas.
 - Firewall UFW con política de entrada denegada: solo SSH, la API de Kubernetes y las redes internas del clúster.
@@ -85,7 +86,8 @@ docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
 - [x] Ingress con Traefik e interfaz de Argo CD por HTTPS
 - [ ] Bastión SSH (Warpgate) y VPN en malla (NetBird)
 - [ ] Entorno cloud y clúster de varios nodos
-- [ ] CI, gestión de secretos (SOPS), monitorización y copias de seguridad
+- [x] CI en GitHub Actions: Terraform, Ansible, gitleaks y pre-commit en cada PR
+- [ ] Gestión de secretos (SOPS), monitorización y copias de seguridad
 
 Pendientes y mejoras: [docs/pendientes.md](docs/pendientes.md).
 
