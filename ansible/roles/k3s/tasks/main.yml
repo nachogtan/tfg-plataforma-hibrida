@@ -27,13 +27,12 @@
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
     INSTALL_K3S_EXEC: "server {{ k3s_server_args | join(' ') }}"
   when: k3s_version not in (k3s_installed.stdout | default(''))
+  changed_when: true  # solo se ejecuta si falta la versión (ver when)
 
 - name: Esperar a que el nodo esté Ready
   ansible.builtin.command: >
     k3s kubectl wait --for=condition=Ready node/{{ inventory_hostname }} --timeout=180s
   changed_when: false
-
-
 
 - name: Leer el kubeconfig del nodo
   ansible.builtin.slurp:

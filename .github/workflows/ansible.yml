@@ -1,7 +1,41 @@
+# Analiza el código de Ansible en cada PR que lo modifique.
+# No usa credenciales ni conecta con las VMs: ansible-lint incluye el syntax-check.
 name: ansible
-on: workflow_dispatch
+
+on:
+  pull_request:
+    paths:
+      - "ansible/**"
+      - ".github/workflows/ansible.yml"
+  push:
+    branches: [main]
+    paths:
+      - "ansible/**"
+      - ".github/workflows/ansible.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  placeholder:
+  lint:
+    name: ansible-lint
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ansible
     steps:
-      - run: echo "Pendiente"
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Instalar Ansible y ansible-lint
+        run: pip install "ansible-core==2.20.7" "ansible-lint==26.*"
+
+      - name: Instalar colecciones
+        run: ansible-galaxy collection install -r requirements.yml
+
+      - name: ansible-lint
+        run: ansible-lint

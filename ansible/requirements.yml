@@ -1,0 +1,6 @@
+---
+# Colecciones necesarias para los roles (instalar con:
+# ansible-galaxy collection install -r requirements.yml)
+collections:
+  - name: community.general   # módulos ufw y timezone
+    version: "12.6.2"
