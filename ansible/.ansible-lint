@@ -1,0 +1,4 @@
+---
+# Configuración de ansible-lint (se ejecuta desde ansible/)
+exclude_paths:
+  - playbooks/core.yml   # placeholder vacío hasta implementar Warpgate (core-01)

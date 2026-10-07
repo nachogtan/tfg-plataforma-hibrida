@@ -1,7 +1,49 @@
+# Comprobaciones de seguridad y calidad en todas las PR y en main.
 name: security
-on: workflow_dispatch
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  placeholder:
+  gitleaks:
+    name: gitleaks (historial completo)
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: "8.30.0"   # misma versión que en .pre-commit-config.yaml
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0   # todo el historial, no solo el último commit
+
+      - name: Instalar gitleaks
+        run: |
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" \
+            | tar -xz -C /usr/local/bin gitleaks
+
+      - name: Buscar secretos
+        run: gitleaks git --redact -v .
+
+  pre-commit:
+    name: hooks de pre-commit
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Pendiente"
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.13"
+
+      - uses: hashicorp/setup-terraform@v4.0.1   # lo necesita el hook terraform_fmt
+        with:
+          terraform_version: 1.16.5
+
+      - name: Ejecutar todos los hooks
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files --show-diff-on-failure

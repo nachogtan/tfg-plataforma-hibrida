@@ -1,7 +1,38 @@
+# Valida el código de Terraform en cada PR que lo modifique.
+# No usa credenciales: no conecta con Proxmox, solo comprueba formato y sintaxis.
 name: terraform
-on: workflow_dispatch
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "terraform/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  placeholder:
+  validate:
+    name: fmt y validate
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Pendiente"
+      - uses: actions/checkout@v7.0.1
+
+      - uses: hashicorp/setup-terraform@v4.0.1
+        with:
+          terraform_version: 1.16.5
+
+      - name: Formato
+        run: terraform fmt -check -recursive -diff terraform/
+
+      - name: Init (sin backend ni credenciales)
+        run: terraform -chdir=terraform/envs/onprem init -backend=false -input=false
+
+      - name: Validate
+        run: terraform -chdir=terraform/envs/onprem validate
