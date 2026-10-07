@@ -35,8 +35,8 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Automatización y comodidad
 
-- [ ] Activar `git config fetch.prune true` para que las ramas borradas en GitHub desaparezcan
-      también en local.
+- [ ] Convertir los workflows de GitHub Actions (`terraform.yml`, `ansible.yml`, `security.yml`), ahora
+      placeholders con `workflow_dispatch`, en comprobaciones reales en cada PR (fmt/validate, lint, gitleaks).
 
 ## Documentación
 
@@ -60,3 +60,5 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] `demo-app` publicada por Ingress en sslip.io. (2026-10-06)
 - [x] Interfaz de Argo CD por HTTPS a través de Traefik. (2026-10-06)
 - [x] Cambiar la contraseña inicial de `admin` de Argo CD y eliminar `argocd-initial-admin-secret`. (2026-10-06)
+- [x] `git config fetch.prune true` en el repositorio. (2026-10-07)
+- [x] Reconstrucción 4: plataforma completa con `make rebuild` en 5 min 25 s. (2026-10-07)
