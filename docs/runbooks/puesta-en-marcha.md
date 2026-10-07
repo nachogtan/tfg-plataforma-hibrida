@@ -138,6 +138,8 @@ Las fases siguientes describen lo que hace cada paso por separado.
 ```bash
    kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
 ```
+   - Vaciar el campo de contraseña antes de pegarla: el navegador puede autorrellenar la de una
+     instalación anterior. Tras 5 fallos, Argo CD bloquea `admin` unos 5 minutos (`too many failed logins`).
    - Cambiarla en *User Info → Update Password* y comprobar que el secreto inicial ya no existe
      (`kubectl -n argocd get secrets`); si sigue, borrarlo con
      `kubectl -n argocd delete secret argocd-initial-admin-secret`.

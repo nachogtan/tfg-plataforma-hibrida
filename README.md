@@ -64,13 +64,14 @@ Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md).
 | [Reconstrucción 1](docs/pruebas/2026-10-03-reconstruccion-1.md) | VM + configuración base | Parcial (3 fallos corregidos) | 26 min 37 s |
 | [Reconstrucción 2](docs/pruebas/2026-10-04-reconstruccion-2.md) | VM + configuración base | ✅ Superada | 9 min 26 s |
 | [Reconstrucción 3](docs/pruebas/2026-10-05-reconstruccion-3.md) | + firewall + k3s + kubectl | ✅ Superada | 8 min 35 s |
+| [Reconstrucción 4](docs/pruebas/2026-10-07-reconstruccion-4.md) | + Argo CD + Traefik + Ingress (`make rebuild`) | ✅ Superada | 5 min 25 s |
 
 ## Estructura del repositorio
 
 ```
 terraform/   Provisión: módulos (imagen, VM) y entornos (onprem, cloud)
 ansible/     Configuración: inventarios, playbooks y roles
-gitops/      Manifiestos que desplegará Argo CD
+gitops/      Manifiestos que despliega Argo CD (App of Apps)
 scripts/     Utilidades (generación del inventario, bootstrap)
 docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
 ```
@@ -80,7 +81,8 @@ docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
 - [x] Provisión de VMs en Proxmox con Terraform y cloud-init
 - [x] Configuración base, hardening SSH y firewall con Ansible
 - [x] Clúster k3s de un nodo y acceso con `kubectl`
-- [ ] GitOps con Argo CD y aplicación de demostración
+- [x] GitOps con Argo CD (App of Apps) y aplicación de demostración
+- [x] Ingress con Traefik e interfaz de Argo CD por HTTPS
 - [ ] Bastión SSH (Warpgate) y VPN en malla (NetBird)
 - [ ] Entorno cloud y clúster de varios nodos
 - [ ] CI, gestión de secretos (SOPS), monitorización y copias de seguridad
