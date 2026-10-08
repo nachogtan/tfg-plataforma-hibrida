@@ -1,0 +1,6 @@
+# Reglas de cifrado de SOPS (ver docs/adr/0004-gestion-secretos-sops.md).
+# Solo se cifran los ficheros secrets/*.sops.yaml; el destinatario es la clave
+# pública age del administrador (la privada vive en ~/.config/sops/age/keys.txt).
+creation_rules:
+  - path_regex: secrets/.*\.sops\.ya?ml$
+    age: age1k8f5xyafqmuaa04z63lu288nv4dxgtxvcefcm3p6ua3knsfs7qvqz0v5df

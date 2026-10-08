@@ -4,3 +4,5 @@
 collections:
   - name: community.general   # módulos ufw y timezone
     version: "12.6.2"
+  - name: community.sops      # load_vars: descifra secrets/*.sops.yaml (ADR-0004)
+    version: "2.5.0"
