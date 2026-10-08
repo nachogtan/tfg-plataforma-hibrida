@@ -5,7 +5,7 @@ tags: [pendientes, backlog]
 
 # Pendientes y mejoras
 
-↑ [[docs/README|Mapa del repositorio]]
+↑ [Mapa del repositorio](README.md)
 
 Lista viva de tareas pendientes y mejoras identificadas durante el proyecto.
 Al completar una, se marca con `[x]` y se indica la fecha o el PR.

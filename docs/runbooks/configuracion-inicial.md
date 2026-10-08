@@ -5,7 +5,7 @@ tags: [runbook, proxmox, prerrequisitos]
 
 # Runbook: Configuración inicial
 
-↑ [[docs/README|Mapa del repositorio]] · Siguiente: [[puesta-en-marcha]]
+↑ [Mapa del repositorio](../README.md) · Siguiente: [puesta-en-marcha](puesta-en-marcha.md)
 
 Pasos manuales que se realizan **una sola vez** antes del primer despliegue.
 
@@ -196,6 +196,6 @@ Deben aparecer cuatro permisos, incluido `Datastore.Allocate`.
 
 ## Relacionado
 
-- Siguiente paso: [[puesta-en-marcha]]
-- Diario: [[2026-10-01]]
-- Diario: [[2026-10-01]] · [[2026-10-02]]
+- Siguiente paso: [puesta-en-marcha](puesta-en-marcha.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md) · [2026-10-02](../diario/2026-10-02.md)

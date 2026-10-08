@@ -7,7 +7,7 @@ tags: [prueba, reproducibilidad]
 
 # Prueba de reconstrucción completa — intento 1
 
-↑ [[docs/README|Mapa del repositorio]] · [[puesta-en-marcha]]
+↑ [Mapa del repositorio](../README.md) · [puesta-en-marcha](../runbooks/puesta-en-marcha.md)
 
 **Fecha:** 2026-10-03 · **Resultado:** Parcial (reconstrucción correcta, 3 fallos detectados y 2 corregidos)
 
@@ -51,7 +51,7 @@ y ~15 min de espera al agente QEMU.
 - **Síntoma:** `Permission check failed (/storage/local, Datastore.Allocate)` en el `destroy`.
 - **Causa:** el rol `TerraformProv` permitía descargar archivos en el almacenamiento, pero no borrarlos.
 - **Corrección:** rol `TerraformStorage` (`Datastore.*`) asignado solo en `/storage/local`
-  (mínimo privilegio). Documentado en [[configuracion-inicial]].
+  (mínimo privilegio). Documentado en [configuracion-inicial](../runbooks/configuracion-inicial.md).
 - **Estado:** ✅ Corregido.
 
 ### 2. Terraform espera al agente QEMU en VMs nuevas

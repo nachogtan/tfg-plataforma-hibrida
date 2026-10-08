@@ -7,7 +7,7 @@ tags: [prueba, reproducibilidad, k3s, gitops, argocd, traefik]
 
 # Prueba de reconstrucción completa — intento 4
 
-↑ [[docs/README|Mapa del repositorio]] · [[puesta-en-marcha]] · Anterior: [[2026-10-05-reconstruccion-3]]
+↑ [Mapa del repositorio](../README.md) · [puesta-en-marcha](../runbooks/puesta-en-marcha.md) · Anterior: [2026-10-05-reconstruccion-3](2026-10-05-reconstruccion-3.md)
 
 **Fecha:** 2026-10-07 · **Resultado:** ✅ Superada
 

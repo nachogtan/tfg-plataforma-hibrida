@@ -5,18 +5,18 @@ tags: [runbook, k3s, escalado]
 
 # Runbook: Añadir un nodo al clúster k3s
 
-↑ [[docs/README|Mapa del repositorio]] · [[arquitectura]]
+↑ [Mapa del repositorio](../README.md) · [arquitectura](../arquitectura.md)
 
 Amplía el clúster con un nuevo nodo *agent* sin afectar a los existentes.
 
 > [!todo] Estado
 > Procedimiento previsto, pendiente de validar cuando estén implementados el módulo [proxmox-vm](../../terraform/modules/proxmox-vm/main.tf) y el rol `k3s`.
 
-**Decisiones de referencia:** [[0002-terraform-ansible-separacion]], [[0001-eleccion-k3s]]
+**Decisiones de referencia:** [0002-terraform-ansible-separacion](../adr/0002-terraform-ansible-separacion.md), [0001-eleccion-k3s](../adr/0001-eleccion-k3s.md)
 
 ## Prerrequisitos
 
-- Clúster operativo (ver [[puesta-en-marcha]]).
+- Clúster operativo (ver [puesta-en-marcha](puesta-en-marcha.md)).
 - Capacidad libre en Proxmox (CPU, RAM, almacenamiento) o cuota en el proveedor cloud.
 
 ## Pasos
@@ -43,5 +43,5 @@ Amplía el clúster con un nuevo nodo *agent* sin afectar a los existentes.
 
 ## Relacionado
 
-- [[puesta-en-marcha]] · [[restauracion]]
-- Diario: [[2026-10-01]]
+- [puesta-en-marcha](puesta-en-marcha.md) · [restauracion](restauracion.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md)

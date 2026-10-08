@@ -7,13 +7,13 @@ tags: [adr, kubernetes, k3s]
 
 # ADR-0001: Elección de k3s como distribución de Kubernetes
 
-↑ [[docs/README|Mapa del repositorio]] · [[arquitectura]]
+↑ [Mapa del repositorio](../README.md) · [arquitectura](../arquitectura.md)
 
 **Estado:** Aceptado · **Fecha:** 2026-10-01
 
 ## Contexto
 
-La plataforma necesita un orquestador de contenedores que funcione sobre VMs de Proxmox con recursos limitados (laboratorio doméstico/académico) y que se pueda extender a nodos en la nube a través de la malla NetBird. El clúster tiene que instalarse de forma reproducible con Ansible y gestionarse después mediante GitOps ([[0003-gitops-argocd]]).
+La plataforma necesita un orquestador de contenedores que funcione sobre VMs de Proxmox con recursos limitados (laboratorio doméstico/académico) y que se pueda extender a nodos en la nube a través de la malla NetBird. El clúster tiene que instalarse de forma reproducible con Ansible y gestionarse después mediante GitOps ([0003-gitops-argocd](0003-gitops-argocd.md)).
 
 ## Opciones consideradas
 
@@ -47,6 +47,6 @@ Se adopta **k3s**, instalado con el rol de Ansible `k3s` sobre el grupo de hosts
 
 ## Relacionado
 
-- ADR: [[0002-terraform-ansible-separacion]], [[0003-gitops-argocd]]
-- Runbooks: [[puesta-en-marcha]], [[añadir-nodo]], [[restauracion]]
-- Diario: [[2026-10-01]]
+- ADR: [0002-terraform-ansible-separacion](0002-terraform-ansible-separacion.md), [0003-gitops-argocd](0003-gitops-argocd.md)
+- Runbooks: [puesta-en-marcha](../runbooks/puesta-en-marcha.md), [añadir-nodo](../runbooks/añadir-nodo.md), [restauracion](../runbooks/restauracion.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md)

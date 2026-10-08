@@ -7,7 +7,7 @@ tags: [adr, seguridad, secretos, sops]
 
 # ADR-0004: Gestión de secretos con SOPS
 
-↑ [[docs/README|Mapa del repositorio]] · [[arquitectura]]
+↑ [Mapa del repositorio](../README.md) · [arquitectura](../arquitectura.md)
 
 **Estado:** Propuesto · **Fecha:** 2026-10-01
 
@@ -22,7 +22,7 @@ Las tres capas manejan información sensible: credenciales del proveedor en Terr
 - Las reglas de cifrado (rutas y destinatarios) se definen en [.sops.yaml](../../.sops.yaml)
   y los ficheros cifrados se guardan en [secrets/](../../secrets/).
 - Las credenciales que no se versionan se mantienen fuera de Git mediante `.gitignore`:
-  - API de Proxmox: variables de entorno en `.env` (ver [[configuracion-inicial]]).
+  - API de Proxmox: variables de entorno en `.env` (ver [configuracion-inicial](../runbooks/configuracion-inicial.md)).
   - Proveedor cloud: `secrets.auto.tfvars`, con plantilla en
     [cloud/secrets.auto.tfvars.example](../../terraform/envs/cloud/secrets.auto.tfvars.example).
 
@@ -44,12 +44,12 @@ Las tres capas manejan información sensible: credenciales del proveedor en Terr
 ## Consecuencias
 
 - ✅ Los secretos quedan versionados y auditables junto al código.
-- ⚠️ La clave privada pasa a ser crítica: si se pierde, no se puede descifrar nada. Su custodia forma parte de [[restauracion]].
+- ⚠️ La clave privada pasa a ser crítica: si se pierde, no se puede descifrar nada. Su custodia forma parte de [restauracion](../runbooks/restauracion.md).
 - ⚠️ La clave privada age se guarda fuera del repositorio, con una copia de seguridad
   en un lugar seguro (por ejemplo, un gestor de contraseñas).
 
 ## Relacionado
 
-- ADR: [[0002-terraform-ansible-separacion]], [[0003-gitops-argocd]]
-- Runbooks: [[puesta-en-marcha]], [[restauracion]]
-- Diario: [[2026-10-01]]
+- ADR: [0002-terraform-ansible-separacion](0002-terraform-ansible-separacion.md), [0003-gitops-argocd](0003-gitops-argocd.md)
+- Runbooks: [puesta-en-marcha](../runbooks/puesta-en-marcha.md), [restauracion](../runbooks/restauracion.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md)
