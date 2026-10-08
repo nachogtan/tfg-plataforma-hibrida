@@ -79,3 +79,12 @@
   loop:
     - "{{ warpgate_ssh_port }}"
     - "{{ warpgate_http_port }}"
+
+- name: Leer las claves públicas cliente de Warpgate (para autorizarlo en las VMs)
+  ansible.builtin.command:
+    cmd: "{{ warpgate_bin }} --config {{ warpgate_config }} client-keys"
+  become: true
+  become_user: "{{ warpgate_user }}"
+  register: warpgate_client_keys
+  changed_when: false
+  check_mode: false  # solo lee: debe ejecutarse también con --check
