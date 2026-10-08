@@ -1,0 +1,81 @@
+---
+- name: Abrir en el firewall los puertos de Warpgate
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    comment: "{{ item.comment }}"
+  loop: "{{ warpgate_firewall_rules }}"
+  when: hardening_firewall_enabled | default(true)
+
+- name: Crear el usuario de sistema de Warpgate (sin login)
+  ansible.builtin.user:
+    name: "{{ warpgate_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    home: "{{ warpgate_data_dir }}"
+    create_home: false
+
+- name: Crear los directorios de configuración y datos
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ warpgate_user }}"
+    group: "{{ warpgate_user }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ warpgate_config_dir }}", mode: "0750" }
+    - { path: "{{ warpgate_data_dir }}", mode: "0700" }
+
+- name: Descargar el binario de Warpgate (versión fijada y SHA-256 verificado)
+  ansible.builtin.get_url:
+    url: "{{ warpgate_url }}"
+    dest: "{{ warpgate_bin }}"
+    checksum: "sha256:{{ warpgate_sha256 }}"
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Reiniciar Warpgate
+
+- name: Instalación inicial desatendida (solo si no existe la configuración)
+  ansible.builtin.command:
+    cmd: >-
+      {{ warpgate_bin }} --config {{ warpgate_config }} unattended-setup
+      --data-path {{ warpgate_data_dir }}
+      --http-port {{ warpgate_http_port }}
+      --ssh-port {{ warpgate_ssh_port }}
+      --external-host {{ ansible_host }}
+      {{ '--record-sessions' if warpgate_record_sessions else '' }}
+    creates: "{{ warpgate_config }}"
+  environment:
+    WARPGATE_ADMIN_PASSWORD: "{{ warpgate_admin_password }}"
+  become: true
+  become_user: "{{ warpgate_user }}"
+  no_log: true
+
+- name: Instalar la unidad systemd de Warpgate
+  ansible.builtin.template:
+    src: warpgate.service.j2
+    dest: /etc/systemd/system/warpgate.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reiniciar Warpgate
+
+- name: Activar y arrancar Warpgate
+  ansible.builtin.systemd_service:
+    name: warpgate
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Aplicar los reinicios pendientes antes de comprobar
+  ansible.builtin.meta: flush_handlers
+
+- name: Esperar a que Warpgate escuche en sus puertos
+  ansible.builtin.wait_for:
+    port: "{{ item }}"
+    timeout: 60
+  loop:
+    - "{{ warpgate_ssh_port }}"
+    - "{{ warpgate_http_port }}"

@@ -5,3 +5,6 @@
 
 - name: Clúster k3s
   ansible.builtin.import_playbook: k3s.yml
+
+- name: Servicios core
+  ansible.builtin.import_playbook: core.yml
