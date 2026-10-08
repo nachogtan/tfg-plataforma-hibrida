@@ -1,5 +1,5 @@
 ---
-# Servicios core: bastión SSH Warpgate (único punto de entrada SSH a las VMs)
+# Servicios core: bastión SSH Warpgate (único punto de entrada SSH humano a las VMs)
 - name: Servicios core (bastión Warpgate)
   hosts: core
   become: true
@@ -25,3 +25,20 @@
         owner: "{{ ansible_user }}"
         group: "{{ ansible_user }}"
         mode: "0600"
+
+    - name: Leer la clave de host SSH (para registrarla como conocida en Warpgate)
+      ansible.builtin.slurp:
+        src: /etc/ssh/ssh_host_ed25519_key.pub
+      register: warpgate_target_host_key
+
+# Configura roles, destinos, huellas y usuarios con la API de Warpgate.
+# Se omite en modo --check: las llamadas a una API no se pueden simular.
+- name: Configurar Warpgate por su API
+  hosts: core
+  gather_facts: false
+  tasks:
+    - name: Aplicar la configuración declarativa (group_vars/core.yml)
+      ansible.builtin.include_role:
+        name: warpgate
+        tasks_from: api
+      when: not ansible_check_mode
