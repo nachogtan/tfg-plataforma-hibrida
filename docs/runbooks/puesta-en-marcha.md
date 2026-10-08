@@ -5,7 +5,7 @@ tags: [runbook, despliegue]
 
 # Runbook: Puesta en marcha de la plataforma
 
-↑ [[docs/README|Mapa del repositorio]] · [[arquitectura]]
+↑ [Mapa del repositorio](../README.md) · [arquitectura](../arquitectura.md)
 
 Despliegue completo desde cero, en cuatro fases: provisión → inventario → configuración → GitOps.
 
@@ -13,11 +13,11 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
 > Fase 1 implementada para on-prem. Las fases 2–4 y el entorno cloud están pendientes; los comandos
 > se ajustarán (y se centralizarán en el [Makefile](../../Makefile)) a medida que se implementen.
 
-**Decisiones de referencia:** [[0002-terraform-ansible-separacion]], [[0001-eleccion-k3s]], [[0003-gitops-argocd]], [[0004-gestion-secretos-sops]]
+**Decisiones de referencia:** [0002-terraform-ansible-separacion](../adr/0002-terraform-ansible-separacion.md), [0001-eleccion-k3s](../adr/0001-eleccion-k3s.md), [0003-gitops-argocd](../adr/0003-gitops-argocd.md), [0004-gestion-secretos-sops](../adr/0004-gestion-secretos-sops.md)
 
 ## Prerrequisitos
 
-- Configuración inicial completada: [[configuracion-inicial]] (herramientas, requisitos de Proxmox, red, token de API y `.env`).
+- Configuración inicial completada: [configuracion-inicial](configuracion-inicial.md) (herramientas, requisitos de Proxmox, red, token de API y `.env`).
 - `secrets.auto.tfvars` creado en el entorno cloud a partir de su `.example` (cuando se implemente).
 - Colecciones de Ansible instaladas: `ansible-galaxy install -r ansible/requirements.yml` ([requirements.yml](../../ansible/requirements.yml)).
 
@@ -162,5 +162,5 @@ Las fases siguientes describen lo que hace cada paso por separado.
 
 ## Relacionado
 
-- [[configuracion-inicial]] · [[añadir-nodo]] · [[restauracion]] . [[2026-10-05-reconstruccion-3]]
-- Diario: [[2026-10-01]] · [[2026-10-02]] . [[2026-10-05]]
+- [configuracion-inicial](configuracion-inicial.md) · [añadir-nodo](añadir-nodo.md) · [restauracion](restauracion.md) . [2026-10-05-reconstruccion-3](../pruebas/2026-10-05-reconstruccion-3.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md) · [2026-10-02](../diario/2026-10-02.md) . [2026-10-05](../diario/2026-10-05.md)

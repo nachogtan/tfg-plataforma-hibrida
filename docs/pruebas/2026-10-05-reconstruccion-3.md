@@ -7,7 +7,7 @@ tags: [prueba, reproducibilidad, k3s, seguridad]
 
 # Prueba de reconstrucción completa — intento 3
 
-↑ [[docs/README|Mapa del repositorio]] · [[puesta-en-marcha]] · Anterior: [[2026-10-04-reconstruccion-2]]
+↑ [Mapa del repositorio](../README.md) · [puesta-en-marcha](../runbooks/puesta-en-marcha.md) · Anterior: [2026-10-04-reconstruccion-2](2026-10-04-reconstruccion-2.md)
 
 **Fecha:** 2026-10-05 · **Resultado:** ✅ Superada
 

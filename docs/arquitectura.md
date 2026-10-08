@@ -5,7 +5,7 @@ tags: [arquitectura, tfg]
 
 # Arquitectura general
 
-↑ [[docs/README|Mapa del repositorio]]
+↑ [Mapa del repositorio](README.md)
 
 La plataforma combina un entorno **on-premise** (hipervisor Proxmox) y un entorno **cloud**, gestionados de forma declarativa en tres capas: provisión con Terraform, configuración con Ansible y entrega de aplicaciones con GitOps (Argo CD).
 
@@ -27,7 +27,7 @@ flowchart LR
 
 ## 1. Provisión: Terraform
 
-Decisión: [[0002-terraform-ansible-separacion]]
+Decisión: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separacion.md)
 
 | Elemento | Función | Código |
 |---|---|---|
@@ -52,7 +52,7 @@ De este modo la fuente de verdad del inventario es Terraform y se evita mantener
 
 ## 3. Configuración: Ansible
 
-Decisiones: [[0002-terraform-ansible-separacion]], [[0001-eleccion-k3s]]
+Decisiones: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separacion.md), [0001-eleccion-k3s](adr/0001-eleccion-k3s.md)
 
 | Playbook | Alcance previsto | Roles |
 |---|---|---|
@@ -72,24 +72,24 @@ Configuración común: [ansible.cfg](../ansible/ansible.cfg), colecciones en [re
 
 ## 4. Entrega continua: GitOps
 
-Decisión: [[0003-gitops-argocd]]
+Decisión: [0003-gitops-argocd](adr/0003-gitops-argocd.md)
 
 | Aplicación | Ruta | Depende de |
 |---|---|---|
-| Argo CD | [bootstrap/argocd/](../gitops/bootstrap/argocd/kustomization.yaml) | Clúster k3s ([[0001-eleccion-k3s]]) |
+| Argo CD | [bootstrap/argocd/](../gitops/bootstrap/argocd/kustomization.yaml) | Clúster k3s ([0001-eleccion-k3s](adr/0001-eleccion-k3s.md)) |
 | Root app | [bootstrap/root-app.yaml](../gitops/bootstrap/root-app.yaml) | Argo CD |
-| Traefik | `gitops/platform/traefik/` | k3s (Traefik integrado desactivado, ver [[0001-eleccion-k3s]]) |
+| Traefik | `gitops/platform/traefik/` | k3s (Traefik integrado desactivado, ver [0001-eleccion-k3s](adr/0001-eleccion-k3s.md)) |
 | cert-manager | `gitops/platform/cert-manager/` | Traefik (TLS de los Ingress) |
 | Monitoring | `gitops/platform/monitoring/` | Rol `node_exporter` en los hosts |
 | Loki | `gitops/platform/loki/` | Monitoring (Grafana) |
-| Velero | `gitops/platform/velero/` | Almacenamiento de copias, ver [[restauracion]] |
+| Velero | `gitops/platform/velero/` | Almacenamiento de copias, ver [restauracion](runbooks/restauracion.md) |
 | demo-app | `gitops/apps/demo-app/` | Plataforma desplegada |
 
 Las ApplicationSets [platform.yaml](../gitops/appsets/platform.yaml) y [apps.yaml](../gitops/appsets/apps.yaml) generan una `Application` por cada subdirectorio de `platform/` y `apps/`.
 
 ## 5. Secretos
 
-Decisión: [[0004-gestion-secretos-sops]]: reglas en [.sops.yaml](../.sops.yaml); ficheros cifrados en [secrets/](../secrets/).
+Decisión: [0004-gestion-secretos-sops](adr/0004-gestion-secretos-sops.md): reglas en [.sops.yaml](../.sops.yaml); ficheros cifrados en [secrets/](../secrets/).
 
 ## CI y seguridad
 
@@ -103,6 +103,6 @@ Validaciones locales con [.pre-commit-config.yaml](../.pre-commit-config.yaml).
 
 ## Procedimientos relacionados
 
-- [[puesta-en-marcha]]
-- [[añadir-nodo]]
-- [[restauracion]]
+- [puesta-en-marcha](runbooks/puesta-en-marcha.md)
+- [añadir-nodo](runbooks/añadir-nodo.md)
+- [restauracion](runbooks/restauracion.md)

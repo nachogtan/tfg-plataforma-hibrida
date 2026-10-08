@@ -7,13 +7,13 @@ tags: [adr, gitops, argocd]
 
 # ADR-0003: GitOps con Argo CD (App of Apps + ApplicationSets)
 
-↑ [[docs/README|Mapa del repositorio]] · [[arquitectura]]
+↑ [Mapa del repositorio](../README.md) · [arquitectura](../arquitectura.md)
 
 **Estado:** Aceptado · **Fecha:** 2026-10-01
 
 ## Contexto
 
-Una vez que Ansible deja el clúster k3s operativo ([[0001-eleccion-k3s]]), los componentes de plataforma y las aplicaciones tienen que desplegarse de forma declarativa, auditable y reproducible, con el repositorio Git como única fuente de verdad.
+Una vez que Ansible deja el clúster k3s operativo ([0001-eleccion-k3s](0001-eleccion-k3s.md)), los componentes de plataforma y las aplicaciones tienen que desplegarse de forma declarativa, auditable y reproducible, con el repositorio Git como única fuente de verdad.
 
 ## Decisión
 
@@ -32,7 +32,7 @@ Componentes de plataforma y su relación con la infraestructura base:
 - `cert-manager`: certificados TLS para los Ingress.
 - `monitoring`: - `monitoring`: kube-prometheus-stack (Prometheus, Grafana, Alertmanager). Los nodos k3s se monitorizan con el node-exporter que incluye el chart; las VMs fuera del clúster (`core-01`, `cloud-01`, PBS) con el rol Ansible `node_exporter`.
 - `loki`: agregación de logs.
-- `velero`: copias de seguridad del clúster (ver [[restauracion]]).
+- `velero`: copias de seguridad del clúster (ver [restauracion](../runbooks/restauracion.md)).
 
 ## Alternativas consideradas
 
@@ -48,13 +48,13 @@ Componentes de plataforma y su relación con la infraestructura base:
 
 - ✅ Añadir un componente consiste en crear un directorio; la ApplicationSet lo detecta sola.
 - ✅ Cualquier deriva entre el clúster y Git queda visible en Argo CD.
-- ⚠️ Los secretos no pueden guardarse en claro en Git: dependen de [[0004-gestion-secretos-sops]].
+- ⚠️ Los secretos no pueden guardarse en claro en Git: dependen de [0004-gestion-secretos-sops](0004-gestion-secretos-sops.md).
 - ⚠️ El orden de arranque entre componentes (p. ej. CRDs de cert-manager) debe controlarse con *sync waves*.
 - ⚠️ El rol Ansible `k3s` debe instalar k3s con `--disable traefik` para evitar dos
   Ingress controllers.
 
 ## Relacionado
 
-- ADR: [[0001-eleccion-k3s]], [[0004-gestion-secretos-sops]]
-- Runbooks: [[puesta-en-marcha]], [[restauracion]]
-- Diario: [[2026-10-01]]
+- ADR: [0001-eleccion-k3s](0001-eleccion-k3s.md), [0004-gestion-secretos-sops](0004-gestion-secretos-sops.md)
+- Runbooks: [puesta-en-marcha](../runbooks/puesta-en-marcha.md), [restauracion](../runbooks/restauracion.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md)

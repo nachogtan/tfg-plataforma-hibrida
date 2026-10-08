@@ -7,7 +7,7 @@ tags: [adr, terraform, ansible, iac]
 
 # ADR-0002: Terraform provisiona, Ansible configura
 
-↑ [[docs/README|Mapa del repositorio]] · [[arquitectura]]
+↑ [Mapa del repositorio](../README.md) · [arquitectura](../arquitectura.md)
 
 **Estado:** Aceptado · **Fecha:** 2026-10-01
 
@@ -41,10 +41,10 @@ La plataforma abarca dos entornos (on-prem en Proxmox y cloud) y necesita tanto 
 - ✅ Cada herramienta se usa para lo que está diseñada; los cambios de configuración no recrean VMs.
 - ✅ Los inventarios siempre reflejan la infraestructura real.
 - ⚠️ El script puente pasa a ser una dependencia crítica y debe validarse en CI.
-- ⚠️ Hay que ejecutar las fases en orden (ver [[puesta-en-marcha]]).
+- ⚠️ Hay que ejecutar las fases en orden (ver [puesta-en-marcha](../runbooks/puesta-en-marcha.md)).
 
 ## Relacionado
 
-- ADR: [[0001-eleccion-k3s]], [[0004-gestion-secretos-sops]]
-- Runbooks: [[puesta-en-marcha]], [[añadir-nodo]]
-- Diario: [[2026-10-01]]
+- ADR: [0001-eleccion-k3s](0001-eleccion-k3s.md), [0004-gestion-secretos-sops](0004-gestion-secretos-sops.md)
+- Runbooks: [puesta-en-marcha](../runbooks/puesta-en-marcha.md), [añadir-nodo](../runbooks/añadir-nodo.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md)

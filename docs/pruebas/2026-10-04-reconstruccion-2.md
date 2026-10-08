@@ -7,13 +7,13 @@ tags: [prueba, reproducibilidad]
 
 # Prueba de reconstrucción completa — intento 2
 
-↑ [[docs/README|Mapa del repositorio]] · [[puesta-en-marcha]] · Anterior: [[2026-10-03-reconstruccion-1]]
+↑ [Mapa del repositorio](../README.md) · [puesta-en-marcha](../runbooks/puesta-en-marcha.md) · Anterior: [2026-10-03-reconstruccion-1](2026-10-03-reconstruccion-1.md)
 
 **Fecha:** 2026-10-04 · **Resultado:** ✅ Superada
 
 ## Objetivo
 
-Repetir la reconstrucción completa tras corregir los fallos del [[2026-10-03-reconstruccion-1|intento 1]]
+Repetir la reconstrucción completa tras corregir los fallos del [intento 1](2026-10-03-reconstruccion-1.md)
 y verificar que la infraestructura on-prem se recrea desde el código sin intervención manual.
 
 ## Cambios desde el intento 1
