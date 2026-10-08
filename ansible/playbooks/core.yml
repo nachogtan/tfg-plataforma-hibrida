@@ -5,3 +5,23 @@
   become: true
   roles:
     - warpgate
+
+# Autoriza la clave cliente de Warpgate en el resto de VMs. La clave privada no
+# sale nunca de core-01; si core-01 se recrea, la línea marcada se sustituye.
+- name: Autorizar el bastión Warpgate en las demás VMs
+  hosts: all:!core
+  become: true
+  vars:
+    warpgate_host: "{{ groups['core'] | first }}"
+    warpgate_client_key: >-
+      {{ (hostvars[warpgate_host].warpgate_client_keys.stdout_lines
+          | select('match', '^ssh-ed25519 ') | first).split()[:2] | join(' ') }}
+  tasks:
+    - name: Añadir la clave cliente de Warpgate a authorized_keys
+      ansible.builtin.lineinfile:
+        path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+        regexp: " warpgate@{{ warpgate_host }}$"
+        line: "{{ warpgate_client_key }} warpgate@{{ warpgate_host }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0600"
