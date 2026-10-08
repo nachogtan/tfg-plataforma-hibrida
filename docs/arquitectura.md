@@ -41,6 +41,22 @@ Decisión: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separa
 
 Los `outputs.tf` de cada entorno exponen los datos de los hosts (nombre, IP, grupo) que consume la capa de configuración.
 
+## Plan de IPs (on-prem)
+
+Red `192.168.1.0/24`, puerta de enlace `192.168.1.1`, nodo Proxmox `ngtn-server` (`192.168.1.90`).
+Las VMs usan el bloque reservado `192.168.1.100–119`, con un rango por rol:
+
+| Rango | Uso | Asignadas |
+|---|---|---|
+| `.100` | Reservada (futura VIP o API del clúster) | — |
+| `.101–.109` | Nodos k3s | `k3s-01` (`.101`, 2 vCPU, 4 GB) |
+| `.110–.114` | Servicios core | `core-01` (`.110`, 1 vCPU, 512 MB) |
+| `.115–.119` | Reserva (PBS, pruebas) | — |
+
+Las IPs se fijan en [terraform.tfvars](../terraform/envs/onprem/terraform.tfvars). `core-01` tiene
+512 MB porque el nodo (8 GB) solo tenía ~1,3 GiB libres con `k3s-01` en marcha; Warpgate consume
+unos 43 MiB.
+
 ## 2. Puente Terraform → Ansible
 
 [scripts/tf-to-inventory.sh](../scripts/tf-to-inventory.sh) transforma `terraform output` en los inventarios de Ansible:
@@ -58,13 +74,16 @@ Decisiones: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separ
 |---|---|---|
 | [site.yml](../ansible/playbooks/site.yml) | Orquesta los demás playbooks | — |
 | [base.yml](../ansible/playbooks/base.yml) | Todos los hosts | `common`, `hardening`, `node_exporter` |
-| [core.yml](../ansible/playbooks/core.yml) | Grupo `core` ([group_vars](../ansible/inventories/onprem/group_vars/core.yml)) | `docker`, `netbird`, `warpgate`, `authentik` |
+| [core.yml](../ansible/playbooks/core.yml) | Grupo `core` ([group_vars](../ansible/inventories/onprem/group_vars/core.yml)) | `warpgate` (previstos: `docker`, `netbird`, `authentik`) |
 | [k3s.yml](../ansible/playbooks/k3s.yml) | Grupo `k3s` ([group_vars](../ansible/inventories/onprem/group_vars/k3s.yml)) | `k3s` |
 
 Servicios de la capa *core* (fuera del clúster):
 
 - **NetBird**: malla VPN (WireGuard) que une on-prem y cloud.
-- **Warpgate**: bastión de acceso SSH/HTTP con auditoría.
+- **Warpgate** (implementado en `core-01`): bastión SSH con control de acceso por roles y grabación
+  de sesiones. Es el único acceso SSH humano a las VMs; usuarios, roles, destinos y huellas se
+  declaran en [group_vars/core.yml](../ansible/inventories/onprem/group_vars/core.yml) y se aplican
+  con su API. Ver [acceso-warpgate](runbooks/acceso-warpgate.md).
 - **Authentik**: proveedor de identidad (SSO) para los servicios de la plataforma.
 - **node_exporter**: métricas de host consumidas por `monitoring` en el clúster.
 
