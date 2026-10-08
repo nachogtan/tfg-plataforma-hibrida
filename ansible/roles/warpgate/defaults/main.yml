@@ -1,0 +1,36 @@
+---
+# Versión fijada de Warpgate y SHA-256 del binario oficial
+# (verificado el 2026-10-08 descargándolo en core-01)
+warpgate_version: v0.29.2
+warpgate_sha256: 0f7dfc9a27cce4d51b5213d52f5ded91f65ac61db9dd0427821c19503ebd1efe
+warpgate_url: >-
+  https://github.com/warp-tech/warpgate/releases/download/{{ warpgate_version }}/warpgate-{{ warpgate_version }}-x86_64-linux
+
+# Rutas
+warpgate_bin: /usr/local/bin/warpgate
+warpgate_config_dir: /etc/warpgate
+warpgate_config: "{{ warpgate_config_dir }}/warpgate.yaml"
+warpgate_data_dir: /var/lib/warpgate
+
+# Usuario de sistema sin login que ejecuta el servicio (mínimo privilegio)
+warpgate_user: warpgate
+
+# Protocolos activados: solo SSH y la interfaz web
+# (MySQL, PostgreSQL, Kubernetes, VNC y RDP quedan desactivados)
+warpgate_ssh_port: 2222
+warpgate_http_port: 8888
+
+# Grabación de sesiones (auditoría)
+warpgate_record_sessions: true
+
+# Fichero cifrado con SOPS que contiene warpgate_admin_password (ADR-0004)
+warpgate_secrets_file: "{{ playbook_dir }}/../../secrets/warpgate.sops.yaml"
+
+# Reglas de firewall del bastión
+warpgate_firewall_rules:
+  - { port: "{{ warpgate_ssh_port }}", proto: tcp, comment: "Warpgate: SSH" }
+  - { port: "{{ warpgate_http_port }}", proto: tcp, comment: "Warpgate: interfaz web (HTTPS)" }
+
+# Contraseña de admin: se descifra con SOPS en el equipo de administración solo
+# cuando una tarea la usa (lookup, sin pasar por los facts de Ansible)
+warpgate_admin_password: "{{ lookup('community.sops.sops', warpgate_secrets_file, extract='[\"warpgate_admin_password\"]') }}"

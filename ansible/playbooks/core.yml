@@ -1,0 +1,7 @@
+---
+# Servicios core: bastión SSH Warpgate (único punto de entrada SSH a las VMs)
+- name: Servicios core (bastión Warpgate)
+  hosts: core
+  become: true
+  roles:
+    - warpgate

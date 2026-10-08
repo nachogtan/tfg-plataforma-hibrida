@@ -1,0 +1,35 @@
+# {{ ansible_managed }}
+# Basada en la unidad oficial (https://warpgate.null.page/systemd/), ejecutada
+# con un usuario sin privilegios y con aislamiento de systemd.
+[Unit]
+Description=Warpgate (bastión SSH)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=notify
+User={{ warpgate_user }}
+Group={{ warpgate_user }}
+ExecStart={{ warpgate_bin }} --config {{ warpgate_config }} run
+Restart=always
+RestartSec=5
+
+# Aislamiento: solo escribe en su directorio de datos
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths={{ warpgate_data_dir }}
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+# Sin capacidades: los puertos 2222 y 8888 no son privilegiados
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target
