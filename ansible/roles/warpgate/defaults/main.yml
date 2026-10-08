@@ -34,3 +34,14 @@ warpgate_firewall_rules:
 # Contraseña de admin: se descifra con SOPS en el equipo de administración solo
 # cuando una tarea la usa (lookup, sin pasar por los facts de Ansible)
 warpgate_admin_password: "{{ lookup('community.sops.sops', warpgate_secrets_file, extract='[\"warpgate_admin_password\"]') }}"
+
+# API de administración (la usa tasks/api.yml desde el equipo de administración).
+# validate_certs desactivado mientras Warpgate use su certificado autofirmado.
+warpgate_api_url: "https://{{ ansible_host }}:{{ warpgate_http_port }}/@warpgate"
+warpgate_api_validate_certs: false
+
+# Destinos SSH: todas las VMs del inventario salvo las del grupo core,
+# con estos roles de acceso
+warpgate_target_roles: [infra]
+warpgate_access_roles: []
+warpgate_users: []

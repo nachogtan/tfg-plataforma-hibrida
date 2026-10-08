@@ -1,0 +1,18 @@
+---
+# Configuración declarativa de Warpgate, aplicada con su API (rol warpgate, tasks/api.yml).
+# Roles de acceso: un usuario puede conectarse a un destino si comparten un rol.
+warpgate_access_roles:
+  - name: infra
+    description: Acceso SSH a las VMs de la plataforma
+
+# Usuarios personales (sin rol de administración de Warpgate)
+warpgate_users:
+  - username: ngtn
+    description: Ignacio Gaitán
+    roles: [infra]
+    allowed_ip_ranges: ["192.168.1.0/24"]
+    credential_policy:
+      ssh: [PublicKey]          # solo clave pública (más adelante: [PublicKey, Totp])
+    public_keys:
+      - label: portatil-fedora
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJpK1sGWH1nmzmI54N8foTixq5O1nFlXMmyYy0u/roLt"

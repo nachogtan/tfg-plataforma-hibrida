@@ -1,0 +1,218 @@
+---
+# Configuración declarativa de Warpgate a través de su API de administración.
+# Se ejecuta en el equipo de administración: inicia sesión como admin con la
+# contraseña cifrada con SOPS y crea lo que falte. No borra lo que sobre.
+- name: API | Iniciar sesión como admin
+  ansible.builtin.uri:
+    url: "{{ warpgate_api_url }}/api/auth/login"
+    method: POST
+    body_format: json
+    body:
+      username: admin
+      password: "{{ warpgate_admin_password }}"
+    status_code: 201
+    validate_certs: "{{ warpgate_api_validate_certs }}"
+  delegate_to: localhost
+  register: warpgate_api_login
+  no_log: true
+
+- name: API | Configuración declarativa
+  delegate_to: localhost
+  module_defaults:
+    ansible.builtin.uri:
+      validate_certs: "{{ warpgate_api_validate_certs }}"
+      body_format: json
+      headers:
+        Cookie: "{{ warpgate_api_login.cookies_string }}"
+  vars:
+    warpgate_admin_api: "{{ warpgate_api_url }}/admin/api"
+    warpgate_target_hosts: "{{ groups['all'] | difference(groups['core']) }}"
+    warpgate_role_ids: "{{ warpgate_api_roles.json | items2dict(key_name='name', value_name='id') }}"
+    warpgate_target_ids: "{{ warpgate_api_targets.json | items2dict(key_name='name', value_name='id') }}"
+    warpgate_user_ids: "{{ warpgate_api_users.json | items2dict(key_name='username', value_name='id') }}"
+  block:
+    # --- Roles de acceso ---
+    - name: API | Leer los roles
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/roles"
+      register: warpgate_api_roles
+
+    - name: API | Crear los roles que falten
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/roles"
+        method: POST
+        body:
+          name: "{{ item.name }}"
+          description: "{{ item.description | default('') }}"
+        status_code: 201
+      loop: "{{ warpgate_access_roles }}"
+      when: item.name not in (warpgate_api_roles.json | map(attribute='name'))
+      changed_when: true
+
+    - name: API | Releer los roles (nombre → id)
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/roles"
+      register: warpgate_api_roles
+
+    # --- Destinos SSH: una VM del inventario = un destino ---
+    - name: API | Leer los destinos
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/targets"
+      register: warpgate_api_targets
+
+    - name: API | Crear los destinos SSH que falten
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/targets"
+        method: POST
+        body:
+          name: "{{ item }}"
+          description: Gestionado por Ansible
+          options:
+            kind: Ssh
+            host: "{{ hostvars[item].ansible_host }}"
+            port: 22
+            username: "{{ hostvars[item].ansible_user }}"
+            allow_insecure_algos: false
+            auth:
+              kind: PublicKey
+          ticket_requests_disabled: false
+          ticket_require_approval: false
+          require_approval: false
+        status_code: 201
+      loop: "{{ warpgate_target_hosts }}"
+      when: item not in (warpgate_api_targets.json | map(attribute='name'))
+      changed_when: true
+
+    - name: API | Releer los destinos (nombre → id)
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/targets"
+      register: warpgate_api_targets
+
+    - name: API | Dar a los destinos sus roles de acceso (409 = ya lo tenía)
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/targets/{{ warpgate_target_ids[item.0] }}/roles/{{ warpgate_role_ids[item.1] }}"
+        method: POST
+        status_code: [201, 409]
+      loop: "{{ warpgate_target_hosts | product(warpgate_target_roles) | list }}"
+      register: warpgate_api_target_roles
+      changed_when: warpgate_api_target_roles.status == 201
+
+    # --- Huellas de los hosts: confianza declarada, sin pregunta interactiva ---
+    - name: API | Leer las huellas conocidas
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/ssh/known-hosts"
+      register: warpgate_api_known_hosts
+
+    - name: API | Registrar las huellas que falten (leídas de cada VM por Ansible)
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/ssh/known-hosts"
+        method: POST
+        body:
+          host: "{{ hostvars[item].ansible_host }}"
+          port: 22
+          key_type: "{{ warpgate_host_key[0] }}"
+          key_base64: "{{ warpgate_host_key[1] }}"
+        status_code: 200
+      vars:
+        warpgate_host_key: "{{ (hostvars[item].warpgate_target_host_key.content | b64decode).split() }}"
+      loop: "{{ warpgate_target_hosts }}"
+      when: >-
+        warpgate_api_known_hosts.json
+        | selectattr('host', 'equalto', hostvars[item].ansible_host)
+        | selectattr('key_base64', 'equalto', warpgate_host_key[1])
+        | list | length == 0
+      changed_when: true
+
+    # --- Usuarios ---
+    - name: API | Leer los usuarios
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users"
+      register: warpgate_api_users
+
+    - name: API | Crear los usuarios que falten
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users"
+        method: POST
+        body:
+          username: "{{ item.username }}"
+          description: "{{ item.description | default('') }}"
+        status_code: 201
+      loop: "{{ warpgate_users }}"
+      when: item.username not in (warpgate_api_users.json | map(attribute='username'))
+      changed_when: true
+
+    - name: API | Releer los usuarios (nombre → id)
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users"
+      register: warpgate_api_users
+
+    - name: API | Ajustar política de credenciales y rangos de IP si difieren
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.username] }}"
+        method: PUT
+        body:
+          username: "{{ item.username }}"
+          description: "{{ item.description | default('') }}"
+          allowed_ip_ranges: "{{ item.allowed_ip_ranges | default([]) }}"
+          credential_policy: "{{ item.credential_policy | default({}) }}"
+        status_code: 200
+      vars:
+        warpgate_current: >-
+          {{ warpgate_api_users.json | selectattr('username', 'equalto', item.username) | first }}
+      loop: "{{ warpgate_users }}"
+      when: >-
+        (warpgate_current.allowed_ip_ranges | default([], true) | sort)
+        != (item.allowed_ip_ranges | default([]) | sort)
+        or ((warpgate_current.credential_policy | default({}, true)).ssh | default([], true))
+        != ((item.credential_policy | default({})).ssh | default([]))
+      changed_when: true
+
+    - name: API | Leer los roles activos de cada usuario
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.username] }}/roles"
+      loop: "{{ warpgate_users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      register: warpgate_api_user_roles
+
+    - name: API | Dar a los usuarios los roles que les falten
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.0.item.username] }}/roles/{{ warpgate_role_ids[item.1] }}"
+        method: POST
+        status_code: 201
+      loop: "{{ warpgate_api_user_roles.results | subelements('item.roles') }}"
+      loop_control:
+        label: "{{ item.0.item.username }}: {{ item.1 }}"
+      when: item.1 not in (item.0.json | selectattr('is_active') | map(attribute='name') | list)
+      changed_when: true
+
+    - name: API | Leer las claves públicas de cada usuario
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.username] }}/credentials/public-keys"
+      loop: "{{ warpgate_users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      register: warpgate_api_user_keys
+
+    - name: API | Añadir las claves públicas que falten (se compara el cuerpo de la clave)
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.0.item.username] }}/credentials/public-keys"
+        method: POST
+        body:
+          label: "{{ item.1.label }}"
+          openssh_public_key: "{{ item.1.key }}"
+        status_code: 201
+      loop: "{{ warpgate_api_user_keys.results | subelements('item.public_keys') }}"
+      loop_control:
+        label: "{{ item.0.item.username }}: {{ item.1.label }}"
+      when: >-
+        item.1.key.split()[1] not in
+        (item.0.json | map(attribute='openssh_public_key')
+         | map('regex_replace', '^\\S+\\s+(\\S+).*$', '\\1') | list)
+      changed_when: true
+  always:
+    - name: API | Cerrar la sesión
+      ansible.builtin.uri:
+        url: "{{ warpgate_api_url }}/api/auth/logout"
+        method: POST
+        status_code: [200, 201, 204]
