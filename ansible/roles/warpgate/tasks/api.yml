@@ -146,6 +146,32 @@
         url: "{{ warpgate_admin_api }}/users"
       register: warpgate_api_users
 
+    # --- TOTP: se crea antes de exigirlo en la política, para no bloquear el acceso ---
+    - name: API | Leer los TOTP de cada usuario
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.username] }}/credentials/otp"
+      loop: "{{ warpgate_users | selectattr('totp', 'defined') | selectattr('totp') }}"
+      loop_control:
+        label: "{{ item.username }}"
+      register: warpgate_api_user_otp
+
+    - name: API | Crear el TOTP si el usuario no tiene ninguno (secreto cifrado con SOPS)
+      ansible.builtin.uri:
+        url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.item.username] }}/credentials/otp"
+        method: POST
+        body:
+          secret_key: >-
+            {{ lookup('community.sops.sops', warpgate_secrets_file,
+                      extract='["warpgate_totp_' ~ item.item.username ~ '"]')
+               | regex_findall('..') | map('int', 0, 16) | list }}
+        status_code: 201
+      loop: "{{ warpgate_api_user_otp.results }}"
+      loop_control:
+        label: "{{ item.item.username }}"
+      when: item.json | length == 0
+      changed_when: true
+      no_log: true
+
     - name: API | Ajustar política de credenciales y rangos de IP si difieren
       ansible.builtin.uri:
         url: "{{ warpgate_admin_api }}/users/{{ warpgate_user_ids[item.username] }}"
@@ -160,11 +186,13 @@
         warpgate_current: >-
           {{ warpgate_api_users.json | selectattr('username', 'equalto', item.username) | first }}
       loop: "{{ warpgate_users }}"
+      loop_control:
+        label: "{{ item.username }}"
       when: >-
         (warpgate_current.allowed_ip_ranges | default([], true) | sort)
         != (item.allowed_ip_ranges | default([]) | sort)
-        or ((warpgate_current.credential_policy | default({}, true)).ssh | default([], true))
-        != ((item.credential_policy | default({})).ssh | default([]))
+        or ((warpgate_current.credential_policy | default({}, true)).ssh | default([], true) | sort)
+        != ((item.credential_policy | default({})).ssh | default([]) | sort)
       changed_when: true
 
     - name: API | Leer los roles activos de cada usuario
