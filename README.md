@@ -74,6 +74,7 @@ Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md).
 | [Reconstrucción 2](docs/pruebas/2026-10-04-reconstruccion-2.md) | VM + configuración base | ✅ Superada | 9 min 26 s |
 | [Reconstrucción 3](docs/pruebas/2026-10-05-reconstruccion-3.md) | + firewall + k3s + kubectl | ✅ Superada | 8 min 35 s |
 | [Reconstrucción 4](docs/pruebas/2026-10-07-reconstruccion-4.md) | + Argo CD + Traefik + Ingress (`make rebuild`) | ✅ Superada | 5 min 25 s |
+| [Reconstrucción 5](docs/pruebas/2026-10-09-reconstruccion-5.md) | + Warpgate + SOPS + TOTP, sin pasos manuales | ✅ Superada | 6 min 33 s |
 
 ## Estructura del repositorio
 
