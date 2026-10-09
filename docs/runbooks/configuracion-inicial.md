@@ -31,6 +31,12 @@ pre-commit install
 pre-commit run --all-files
 ```
 
+Instalar las colecciones de Ansible con las versiones fijadas:
+
+```bash
+ansible-galaxy collection install -r ansible/requirements.yml
+```
+
 Variable para usar el clúster con `kubectl` (se recomienda añadirla a `~/.bashrc`):
 
 ```bash
@@ -69,11 +75,6 @@ ssh root@192.168.1.90 "hostname"
 
 Debe responder con el nombre del nodo sin pedir contraseña (más allá de la de la clave, si no está cargada).
 
-```bash
-cat /etc/pve/storage.cfg
-ip -br addr | grep vmbr
-```
-
 ### 0.3 Red
 
 | Elemento | Valor |
@@ -84,7 +85,8 @@ ip -br addr | grep vmbr
 | Bloque reservado para la plataforma | `192.168.1.100` – `192.168.1.119` |
 | Rango DHCP del router | a partir de `192.168.1.120` |
 
-Las VMs usan IP fija dentro del bloque reservado. Antes de asignar una IP nueva, comprobar que está libre:
+Las VMs usan IP fija dentro del bloque reservado, con un rango por rol (ver el
+[plan de IPs](../arquitectura.md#plan-de-ips-on-prem)). Antes de asignar una IP nueva, comprobar que está libre:
 
 ```bash
 ping -c 2 -W 1 <IP>
@@ -194,8 +196,30 @@ pveum user permissions terraform-prov@pve --path /storage/local | grep Datastore
 
 Deben aparecer cuatro permisos, incluido `Datastore.Allocate`.
 
+## 2. Clave `age` para SOPS
+
+Los secretos del repositorio (`secrets/*.sops.yaml`) se cifran para una clave `age`
+([0004-gestion-secretos-sops](../adr/0004-gestion-secretos-sops.md)). Se crea una sola vez, en el
+equipo de administración y fuera del repositorio:
+
+```bash
+mkdir -p ~/.config/sops/age
+age-keygen -o ~/.config/sops/age/keys.txt
+chmod 600 ~/.config/sops/age/keys.txt
+age-keygen -y ~/.config/sops/age/keys.txt    # muestra la clave pública (age1…)
+```
+
+- La clave **pública** va en [.sops.yaml](../../.sops.yaml) como destinataria.
+- La clave **privada** (`keys.txt`) se guarda también en un gestor de contraseñas: si se pierde,
+  ningún secreto del repositorio se puede descifrar.
+
+Verificación:
+
+```bash
+sops decrypt --extract '["warpgate_admin_password"]' secrets/warpgate.sops.yaml | wc -c   # > 0
+```
+
 ## Relacionado
 
 - Siguiente paso: [puesta-en-marcha](puesta-en-marcha.md)
-- Diario: [2026-10-01](../diario/2026-10-01.md)
-- Diario: [2026-10-01](../diario/2026-10-01.md) · [2026-10-02](../diario/2026-10-02.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md) · [2026-10-02](../diario/2026-10-02.md) · [2026-10-08](../diario/2026-10-08.md)
