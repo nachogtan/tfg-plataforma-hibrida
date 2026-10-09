@@ -18,18 +18,14 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Seguridad
 
-- [ ] Rotar la clave SSH personal (passphrase olvidada; hoy funciona porque está cargada en el
-      `ssh-agent`): clave nueva con passphrase guardada en un gestor de contraseñas, añadirla a
-      Proxmox sin quitar la antigua, cambiarla en `terraform.tfvars` y en `group_vars/core.yml`
-      (Warpgate) y retirar la antigua.
 - [ ] Copia de seguridad de la clave `age` (`~/.config/sops/age/keys.txt`) y de la contraseña de
       admin de Warpgate en un gestor de contraseñas.
 - [ ] Caducidad de la clave en el agente (`ssh-add -t`); opcional, clave FIDO2 `ed25519-sk`.
-- [ ] Segundo factor (TOTP) en Warpgate: `ssh: [PublicKey, Totp]` y en el panel web (el login de
-      Ansible por la API tendrá que contemplarlo).
-- [ ] Restringir el puerto 22 de las VMs a `core-01` y al equipo de administración. Requiere IP fija
-      del portátil (reserva DHCP en el router o IP de NetBird); después, cerrar también el 22 de
-      `core-01` a la LAN.
+- [ ] Usuario de API propio para Ansible en Warpgate (por ejemplo, `ansible-api`) con un rol de
+      administración limitado, para distinguir en la auditoría la automatización del acceso humano.
+- [ ] TOTP en el panel web de Warpgate para `admin` (requiere antes el usuario de API para Ansible).
+- [ ] Restringir el puerto 22 de las VMs a `core-01` y al equipo de administración, usando la IP fija
+      de la VPN (NetBird o Tailscale, por decidir); después, cerrar también el 22 de `core-01` a la LAN.
 - [ ] Claves de host fijas para Warpgate (`--import-ssh-host-keys`, cifradas con SOPS) para que su
       huella no cambie al recrear `core-01`.
 - [ ] Hook de pre-commit que compruebe que los ficheros de `secrets/` están cifrados con SOPS.
@@ -90,3 +86,4 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Documentación al día tras la auditoría: README, mapa, arquitectura, ADR, runbooks y diarios. (2026-10-09)
 - [x] Revisión del ADR-0003 (Kustomize, `prune`, `selfHeal` y `ServerSideApply`). (2026-10-09)
 - [x] Contraseña de `admin` de Argo CD declarativa con SOPS: `make rebuild` sin pasos manuales. (2026-10-09)
+- [x] TOTP en Warpgate para el acceso SSH (clave pública + código), con el secreto cifrado con SOPS. (2026-10-09)

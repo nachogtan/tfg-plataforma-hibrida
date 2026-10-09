@@ -82,8 +82,8 @@ Decisiones: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separ
 Servicios de la capa *core* (fuera del clúster):
 
 - **NetBird** *(previsto)*: malla VPN (WireGuard) que une on-prem y cloud.
-- **Warpgate** (implementado en `core-01`): bastión SSH con control de acceso por roles y grabación
-  de sesiones. Es el único acceso SSH humano a las VMs; usuarios, roles, destinos y huellas se
+- **Warpgate** (implementado en `core-01`): bastión SSH con control de acceso por roles, doble factor
+  (clave pública + TOTP) y grabación de sesiones. Es el único acceso SSH humano a las VMs; usuarios, roles, destinos y huellas se
   declaran en [group_vars/core.yml](../ansible/inventories/onprem/group_vars/core.yml) y se aplican
   con su API. Ver [acceso-warpgate](runbooks/acceso-warpgate.md).
 - **Authentik** *(previsto)*: proveedor de identidad (SSO) para los servicios de la plataforma.

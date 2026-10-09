@@ -12,7 +12,8 @@ warpgate_users:
     roles: [infra]
     allowed_ip_ranges: ["192.168.1.0/24"]
     credential_policy:
-      ssh: [PublicKey]          # solo clave pública (más adelante: [PublicKey, Totp])
+      ssh: [PublicKey, Totp]    # clave pública + código TOTP
+    totp: true                  # secreto en secrets/warpgate.sops.yaml (warpgate_totp_<usuario>)
     public_keys:
       - label: portatil-fedora
         key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJpK1sGWH1nmzmI54N8foTixq5O1nFlXMmyYy0u/roLt"
