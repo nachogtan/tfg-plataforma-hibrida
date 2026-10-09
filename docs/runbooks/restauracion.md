@@ -46,9 +46,8 @@ Verificado en la [reconstrucción 4](../pruebas/2026-10-07-reconstruccion-4.md) 
 
 1. Recuperar la clave `age` en el equipo de administración (desde el gestor de contraseñas).
 2. `make rebuild` (o `make deploy` si no queda nada): VMs, configuración y Argo CD, que vuelve a
-   desplegar la plataforma desde Git.
-3. Cambiar la contraseña inicial de Argo CD (ver [puesta-en-marcha](puesta-en-marcha.md)).
-4. *(Previsto, con Velero)* Restaurar los datos con estado:
+   desplegar la plataforma desde Git, con su contraseña de admin ya aplicada desde SOPS.
+3. *(Previsto, con Velero)* Restaurar los datos con estado:
    ```bash
    velero backup get
    velero restore create --from-backup <backup>

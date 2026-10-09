@@ -37,8 +37,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Usuario SSH dedicado con permisos mínimos para Terraform en Proxmox, en lugar de root.
 - [ ] Endurecer el SSH del nodo Proxmox (`PermitRootLogin prohibit-password`, sin contraseñas).
 - [ ] Certificado válido en Proxmox y eliminar `PROXMOX_VE_INSECURE`.
-- [ ] Contraseña de `admin` de Argo CD declarativa (hash en `argocd-secret` cifrado con SOPS, ya
-      disponible), para no tener que cambiarla a mano tras cada reconstrucción.
 - [ ] DNS interno en lugar de sslip.io para los servicios con credenciales (Argo CD, Warpgate…),
       con certificados válidos emitidos por cert-manager.
 
@@ -91,3 +89,4 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Configuración de Warpgate como código con su API; probada recreando `core-01` (47 s). (2026-10-08, PR #39)
 - [x] Documentación al día tras la auditoría: README, mapa, arquitectura, ADR, runbooks y diarios. (2026-10-09)
 - [x] Revisión del ADR-0003 (Kustomize, `prune`, `selfHeal` y `ServerSideApply`). (2026-10-09)
+- [x] Contraseña de `admin` de Argo CD declarativa con SOPS: `make rebuild` sin pasos manuales. (2026-10-09)
