@@ -45,6 +45,13 @@ Se adopta **k3s**, instalado con el rol de Ansible `k3s` sobre el grupo de hosts
 - Variables del grupo: [group_vars/k3s.yml](../../ansible/inventories/onprem/group_vars/k3s.yml)
 - VMs: [terraform/envs/onprem/main.tf](../../terraform/envs/onprem/main.tf) (módulo [proxmox-vm](../../terraform/modules/proxmox-vm/main.tf))
 
+## Actualización (2026-10-09)
+
+- Implementado con k3s `v1.36.5+k3s1` (versión fijada en el rol) y `--disable=traefik`: Traefik se
+  despliega con Argo CD desde [gitops/platform/traefik/](../../gitops/platform/traefik/application.yaml).
+- ServiceLB (integrado en k3s) se mantiene: publica Traefik en los puertos 80/443 de la IP del nodo.
+- Clúster de un nodo (`k3s-01`); la ampliación a varios nodos sigue pendiente.
+
 ## Relacionado
 
 - ADR: [0002-terraform-ansible-separacion](0002-terraform-ansible-separacion.md), [0003-gitops-argocd](0003-gitops-argocd.md)
