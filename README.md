@@ -62,7 +62,7 @@ Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md).
 - CI sin credenciales en cada PR (gitleaks sobre todo el historial y hooks de pre-commit), obligatoria para fusionar en `main`.
 - Token de API de Proxmox con permisos mínimos; permisos de borrado limitados al almacenamiento de imágenes.
 - SSH solo con clave pública, sin acceso de `root` ni contraseñas.
-- Acceso SSH humano centralizado en el bastión Warpgate: roles, solo clave pública y sesiones grabadas.
+- Acceso SSH humano centralizado en el bastión Warpgate: roles, clave pública + TOTP y sesiones grabadas.
 - Secretos versionados cifrados con SOPS + age; la clave privada nunca entra en el repositorio.
 - Firewall UFW con política de entrada denegada: solo SSH, la API de Kubernetes y las redes internas del clúster.
 

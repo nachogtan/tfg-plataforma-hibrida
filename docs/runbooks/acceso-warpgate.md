@@ -25,6 +25,9 @@ Ansible no pasa por Warpgate: usa SSH directo al puerto 22 desde el equipo de ad
 
 ## Uso diario
 
+Autenticación: **clave pública + código TOTP** de 6 dígitos (app de autenticación del móvil).
+Warpgate pide el código tras validar la clave (`One-time password:`).
+
 1. Entrar a una VM (el usuario de Warpgate y el destino van separados por `:`):
 ```bash
    ssh -p 2222 'ngtn:k3s-01@192.168.1.110'
@@ -84,6 +87,7 @@ ssh-keygen -R '[192.168.1.110]:2222'
 | `Received disconnect … 11` | Huella del destino desconocida y sin terminal para preguntar | Ejecutar `make configure` (registra las huellas) o conectar una vez en modo interactivo |
 | `REMOTE HOST IDENTIFICATION HAS CHANGED` en el 2222 | `core-01` recreada | `ssh-keygen -R '[192.168.1.110]:2222'` |
 | `Permission denied` | Clave no registrada, rol que falta o IP fuera de `allowed_ip_ranges` | Revisar `group_vars/core.yml` y `make configure` |
+| Código TOTP rechazado (vuelve a pedirlo) | Código caducado o reloj del móvil desincronizado | Esperar al siguiente código; activar la hora automática en el móvil |
 | Diagnóstico general | — | `ssh admin@192.168.1.110 'sudo journalctl -u warpgate -n 30'` |
 
 ## Verificación
@@ -97,4 +101,18 @@ make check                                                     # changed=0
 
 - La configuración por API crea lo que falta, pero **no borra** lo que sobra.
 - Se omite en modo `--check` (una API no se puede simular).
-- Sin segundo factor (TOTP) todavía; ver [pendientes](../pendientes.md).
+- El secreto TOTP se crea por la API solo si el usuario no tiene ninguno: la API no devuelve el
+  secreto, así que no se puede comparar con el de SOPS.
+
+## TOTP: alta, pérdida del móvil y rotación
+
+- **Alta de un usuario:** generar su secreto `warpgate_totp_<usuario>` en
+  [secrets/warpgate.sops.yaml](../../secrets/warpgate.sops.yaml), registrarlo en la app (QR con
+  `qrencode -t ansiutf8`), poner `totp: true` y `ssh: [PublicKey, Totp]` en `group_vars/core.yml` y
+  ejecutar `make configure` (crea el TOTP antes de exigirlo).
+- **Pérdida del móvil:** volver a escanear el QR desde el secreto cifrado en un móvil nuevo. Si el
+  secreto pudiera estar comprometido, rotarlo.
+- **Rotación:** borrar la credencial TOTP del usuario en el panel, regenerar el secreto en SOPS,
+  registrarlo en la app y ejecutar `make configure`.
+- **Acceso de emergencia:** el SSH directo al puerto 22 desde el equipo de administración sigue
+  disponible mientras no se restrinja (ver [pendientes](../pendientes.md)).
