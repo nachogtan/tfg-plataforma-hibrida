@@ -1,6 +1,6 @@
 ---
 title: "ADR-0004: Gestión de secretos con SOPS"
-estado: Propuesto
+estado: Aceptado
 fecha: 2026-10-01
 tags: [adr, seguridad, secretos, sops]
 ---
@@ -9,7 +9,7 @@ tags: [adr, seguridad, secretos, sops]
 
 ↑ [Mapa del repositorio](../README.md) · [arquitectura](../arquitectura.md)
 
-**Estado:** Propuesto · **Fecha:** 2026-10-01
+**Estado:** Aceptado (2026-10-08) · **Fecha:** 2026-10-01
 
 ## Contexto
 
@@ -26,9 +26,11 @@ Las tres capas manejan información sensible: credenciales del proveedor en Terr
   - Proveedor cloud: `secrets.auto.tfvars`, con plantilla en
     [cloud/secrets.auto.tfvars.example](../../terraform/envs/cloud/secrets.auto.tfvars.example).
 
-> [!todo] Pendiente de decidir
+> [!NOTE]
+> Pendiente de decidir:
 > - Integración con Argo CD: plugin KSOPS u otra alternativa.
-> - Hook de pre-commit que impida subir secretos en claro ([.pre-commit-config.yaml](../../.pre-commit-config.yaml)).
+> - Hook de pre-commit que compruebe que los ficheros de `secrets/` están cifrados (gitleaks ya
+>   detecta secretos conocidos en claro, ver [.pre-commit-config.yaml](../../.pre-commit-config.yaml)).
 
 ## Alternativas consideradas
 
@@ -47,6 +49,20 @@ Las tres capas manejan información sensible: credenciales del proveedor en Terr
 - ⚠️ La clave privada pasa a ser crítica: si se pierde, no se puede descifrar nada. Su custodia forma parte de [restauracion](../runbooks/restauracion.md).
 - ⚠️ La clave privada age se guarda fuera del repositorio, con una copia de seguridad
   en un lugar seguro (por ejemplo, un gestor de contraseñas).
+
+## Actualización (2026-10-08)
+
+Implementado para la capa de Ansible:
+
+- Regla en [.sops.yaml](../../.sops.yaml): se cifra todo `secrets/*.sops.yaml` para la clave pública
+  `age` del administrador; la privada está en `~/.config/sops/age/keys.txt`, fuera del repositorio.
+- Primer secreto: contraseña de admin de Warpgate ([secrets/warpgate.sops.yaml](../../secrets/warpgate.sops.yaml)),
+  generada al azar y cifrada sin pasar por texto plano.
+- Ansible la descifra en el equipo de administración con el lookup `community.sops.sops` (colección
+  `community.sops` 2.5.0). Se descartó `community.sops.load_vars` porque inyecta los secretos como
+  *facts*, un mecanismo obsoleto que desaparece en ansible-core 2.24.
+- La CI no tiene la clave `age`: valida la sintaxis sin descifrar nada.
+- Pendiente: secretos de Kubernetes (contraseña de Argo CD) y de Terraform.
 
 ## Relacionado
 

@@ -13,7 +13,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   node_name = var.node_name
   tags      = var.tags
 
-  # La imagen genericcloud no incluye el agente QEMU; se activará con Ansible más adelante
+  # La imagen genericcloud no incluye el agente QEMU: lo instala cloud-init (vendor-data, envs/onprem/main.tf)
   agent {
     enabled = true
   }

@@ -15,18 +15,21 @@ flowchart LR
     B -->|VMs, imagen y cloud-init| C[Proxmox VE]
     B -->|outputs| D[tf-to-inventory.sh]
     D -->|inventario| E[Ansible]
+    S[(SOPS + age)] -.->|secretos| E
     E -->|base, hardening, firewall| F[VMs Debian 13]
     E -->|instala| G[Clúster k3s]
-    A -.->|GitOps, próximamente| H[Argo CD]
-    H -.-> G
+    E -->|instala y configura por API| W[Warpgate en core-01]
+    A -->|GitOps| H[Argo CD]
+    H -->|Traefik y aplicaciones| G
+    W -.->|SSH con roles y grabación| F
 ```
 
 | Capa | Herramienta | Función |
 |---|---|---|
 | Provisión | Terraform (`bpg/proxmox`) | Imagen Debian 13, snippet de cloud-init y VMs en Proxmox |
-| Configuración | Ansible | Paquetes base, hardening SSH, firewall UFW y clúster k3s |
+| Configuración | Ansible | Paquetes base, hardening SSH, firewall UFW, clúster k3s y bastión Warpgate |
 | Orquestación | k3s `v1.36.5+k3s1` | Kubernetes ligero, sin Traefik integrado |
-| GitOps | Argo CD | *En desarrollo* |
+| GitOps | Argo CD v3.5.3 | App of Apps: Traefik, aplicaciones e Ingress desde Git |
 | Acceso | Warpgate v0.29.2 | Bastión SSH con roles y grabación de sesiones, configurado por API |
 | Secretos | SOPS + age | Secretos cifrados en el repositorio |
 | Calidad | pre-commit, GitHub Actions | Formato, validación y detección de secretos |
@@ -34,7 +37,8 @@ flowchart LR
 ## Requisitos
 
 - Proxmox VE 9.x con un usuario y token de API para Terraform.
-- Equipo de administración con `terraform`, `ansible`, `jq`, `kubectl`, `make` y `pre-commit`.
+- Equipo de administración con `terraform`, `ansible`, `jq`, `kubectl`, `make`, `pre-commit`, `sops` y `age`.
+- Clave privada `age` en `~/.config/sops/age/keys.txt` para descifrar los secretos de `secrets/`.
 - Archivo `.env` con las credenciales de Proxmox (ver `.env.example`).
 
 Guía completa: [Configuración inicial](docs/runbooks/configuracion-inicial.md).

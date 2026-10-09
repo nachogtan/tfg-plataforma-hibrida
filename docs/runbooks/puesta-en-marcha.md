@@ -9,9 +9,9 @@ tags: [runbook, despliegue]
 
 Despliegue completo desde cero, en cuatro fases: provisión → inventario → configuración → GitOps.
 
-> [!todo] Estado
-> Fase 1 implementada para on-prem. Las fases 2–4 y el entorno cloud están pendientes; los comandos
-> se ajustarán (y se centralizarán en el [Makefile](../../Makefile)) a medida que se implementen.
+> [!NOTE]
+> **Estado (2026-10-09):** las cuatro fases están implementadas para on-prem y centralizadas en el
+> [Makefile](../../Makefile). Verificado en las pruebas de reconstrucción. El entorno cloud está pendiente.
 
 **Decisiones de referencia:** [0002-terraform-ansible-separacion](../adr/0002-terraform-ansible-separacion.md), [0001-eleccion-k3s](../adr/0001-eleccion-k3s.md), [0003-gitops-argocd](../adr/0003-gitops-argocd.md), [0004-gestion-secretos-sops](../adr/0004-gestion-secretos-sops.md)
 
@@ -19,7 +19,8 @@ Despliegue completo desde cero, en cuatro fases: provisión → inventario → c
 
 - Configuración inicial completada: [configuracion-inicial](configuracion-inicial.md) (herramientas, requisitos de Proxmox, red, token de API y `.env`).
 - `secrets.auto.tfvars` creado en el entorno cloud a partir de su `.example` (cuando se implemente).
-- Colecciones de Ansible instaladas: `ansible-galaxy install -r ansible/requirements.yml` ([requirements.yml](../../ansible/requirements.yml)).
+- Clave `age` en `~/.config/sops/age/keys.txt` para descifrar los secretos de `secrets/` (ver [0004-gestion-secretos-sops](../adr/0004-gestion-secretos-sops.md)).
+- Colecciones de Ansible instaladas: `ansible-galaxy collection install -r ansible/requirements.yml` ([requirements.yml](../../ansible/requirements.yml)).
 
 ## Atajos con make
 
@@ -27,7 +28,7 @@ Todo el procedimiento está disponible como objetivos del [Makefile](../../Makef
 
 ```bash
 make help      # lista de objetivos
-make deploy    # Fases 1–3: Terraform + inventario + Ansible
+make deploy    # Fases 1–4: Terraform + inventario + Ansible + GitOps
 make check     # idempotencia de Terraform y Ansible
 make rebuild   # destruye y vuelve a crear la plataforma
 ```
@@ -77,7 +78,8 @@ Las fases siguientes describen lo que hace cada paso por separado.
 ## Fase 3: Configuración (Ansible)
 
 > Implementado: `base.yml` (roles `common` y `hardening` con firewall UFW), `k3s.yml` (rol `k3s` con
-> reglas de firewall y kubeconfig local) y `site.yml`. Pendiente: `core.yml`.
+> reglas de firewall y kubeconfig local), `core.yml` (bastión Warpgate, configurado por su API; ver
+> [acceso-warpgate](acceso-warpgate.md)) y `site.yml`, que ejecuta los tres.
 
 1. Si el cambio afecta a SSH, abrir antes una sesión en la VM como red de seguridad.
 2. Aplicar la configuración completa (desde `ansible/`):
@@ -155,12 +157,15 @@ Las fases siguientes describen lo que hace cada paso por separado.
 
 - [ ] `kubectl get nodes`: todos los nodos en `Ready`.
 - [ ] `kubectl -n argocd get applications`: todas en `Synced` / `Healthy`.
-- [ ] Grafana muestra las métricas de `node_exporter` de todos los hosts.
-- [ ] `demo-app` accesible por Ingress con certificado TLS válido.
+- [ ] Acceso por el bastión: `ssh -p 2222 'ngtn:k3s-01@192.168.1.110' hostname` devuelve `k3s-01`.
+- [ ] `make check`: Terraform sin cambios y Ansible con `changed=0`.
+- [ ] *(Previsto)* Grafana muestra las métricas de `node_exporter` de todos los hosts.
+- [ ] `demo-app` accesible por Ingress (`http://demo.192.168.1.101.sslip.io`); *(previsto)* con certificado TLS válido.
 - [ ] Un cambio fusionado en `gitops/apps/` se aplica solo en menos de 3 minutos.
 - [ ] Un cambio manual en el clúster es revertido por Argo CD (`selfHeal`).
 
 ## Relacionado
 
-- [configuracion-inicial](configuracion-inicial.md) · [añadir-nodo](añadir-nodo.md) · [restauracion](restauracion.md) . [2026-10-05-reconstruccion-3](../pruebas/2026-10-05-reconstruccion-3.md)
-- Diario: [2026-10-01](../diario/2026-10-01.md) · [2026-10-02](../diario/2026-10-02.md) . [2026-10-05](../diario/2026-10-05.md)
+- Runbooks: [configuracion-inicial](configuracion-inicial.md) · [acceso-warpgate](acceso-warpgate.md) · [añadir-nodo](añadir-nodo.md) · [restauracion](restauracion.md)
+- Pruebas: [reconstrucción 3](../pruebas/2026-10-05-reconstruccion-3.md) · [reconstrucción 4](../pruebas/2026-10-07-reconstruccion-4.md)
+- Diario: [2026-10-01](../diario/2026-10-01.md) · [2026-10-02](../diario/2026-10-02.md) · [2026-10-05](../diario/2026-10-05.md) · [2026-10-08](../diario/2026-10-08.md)

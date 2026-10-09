@@ -9,8 +9,10 @@ tags: [arquitectura, tfg]
 
 La plataforma combina un entorno **on-premise** (hipervisor Proxmox) y un entorno **cloud**, gestionados de forma declarativa en tres capas: provisión con Terraform, configuración con Ansible y entrega de aplicaciones con GitOps (Argo CD).
 
-> [!todo] Pendiente de validar
-> El contenido refleja la estructura del repositorio. Los detalles (proveedor cloud, número de nodos, direccionamiento) se completarán cuando se implementen los ficheros correspondientes.
+> [!NOTE]
+> **Estado (2026-10-09):** el entorno on-prem está implementado y verificado con pruebas de
+> reconstrucción. Los elementos marcados como *(previsto)* forman parte del diseño, pero aún no
+> están desplegados. El entorno cloud y el proveedor están por decidir.
 
 ## Flujo de despliegue
 
@@ -32,11 +34,11 @@ Decisión: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separa
 | Elemento | Función | Código |
 |---|---|---|
 | Entorno on-prem | VMs en Proxmox para nodos `core` y `k3s` | [envs/onprem/main.tf](../terraform/envs/onprem/main.tf) |
-| Entorno cloud | VM(s) en proveedor cloud | [envs/cloud/main.tf](../terraform/envs/cloud/main.tf) |
+| Entorno cloud *(previsto)* | VM(s) en proveedor cloud | [envs/cloud/main.tf](../terraform/envs/cloud/main.tf) |
 | Módulo `proxmox-image` | Plantilla base (imagen cloud-init) | [modules/proxmox-image/](../terraform/modules/proxmox-image/main.tf) |
 | Módulo `proxmox-vm` | VM reutilizable en Proxmox | [modules/proxmox-vm/](../terraform/modules/proxmox-vm/main.tf) |
 | Módulo `cloud-vm` | VM reutilizable en la nube | [modules/cloud-vm/](../terraform/modules/cloud-vm/main.tf) |
-| Estado remoto | Backend por entorno | [onprem/backend.tf](../terraform/envs/onprem/backend.tf), [cloud/backend.tf](../terraform/envs/cloud/backend.tf) |
+| Estado | Local en el equipo de administración; backend remoto *(previsto)* | [onprem/backend.tf](../terraform/envs/onprem/backend.tf), [cloud/backend.tf](../terraform/envs/cloud/backend.tf) |
 | Credenciales | Variables sensibles fuera del repositorio | `secrets.auto.tfvars.example` en cada entorno |
 
 Los `outputs.tf` de cada entorno exponen los datos de los hosts (nombre, IP, grupo) que consume la capa de configuración.
@@ -73,19 +75,19 @@ Decisiones: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separ
 | Playbook | Alcance previsto | Roles |
 |---|---|---|
 | [site.yml](../ansible/playbooks/site.yml) | Orquesta los demás playbooks | — |
-| [base.yml](../ansible/playbooks/base.yml) | Todos los hosts | `common`, `hardening`, `node_exporter` |
+| [base.yml](../ansible/playbooks/base.yml) | Todos los hosts | `common`, `hardening` (previsto: `node_exporter`) |
 | [core.yml](../ansible/playbooks/core.yml) | Grupo `core` ([group_vars](../ansible/inventories/onprem/group_vars/core.yml)) | `warpgate` (previstos: `docker`, `netbird`, `authentik`) |
 | [k3s.yml](../ansible/playbooks/k3s.yml) | Grupo `k3s` ([group_vars](../ansible/inventories/onprem/group_vars/k3s.yml)) | `k3s` |
 
 Servicios de la capa *core* (fuera del clúster):
 
-- **NetBird**: malla VPN (WireGuard) que une on-prem y cloud.
+- **NetBird** *(previsto)*: malla VPN (WireGuard) que une on-prem y cloud.
 - **Warpgate** (implementado en `core-01`): bastión SSH con control de acceso por roles y grabación
   de sesiones. Es el único acceso SSH humano a las VMs; usuarios, roles, destinos y huellas se
   declaran en [group_vars/core.yml](../ansible/inventories/onprem/group_vars/core.yml) y se aplican
   con su API. Ver [acceso-warpgate](runbooks/acceso-warpgate.md).
-- **Authentik**: proveedor de identidad (SSO) para los servicios de la plataforma.
-- **node_exporter**: métricas de host consumidas por `monitoring` en el clúster.
+- **Authentik** *(previsto)*: proveedor de identidad (SSO) para los servicios de la plataforma.
+- **node_exporter** *(previsto)*: métricas de host consumidas por `monitoring` en el clúster.
 
 Configuración común: [ansible.cfg](../ansible/ansible.cfg), colecciones en [requirements.yml](../ansible/requirements.yml).
 
@@ -97,11 +99,12 @@ Decisión: [0003-gitops-argocd](adr/0003-gitops-argocd.md)
 |---|---|---|
 | Argo CD | [bootstrap/argocd/](../gitops/bootstrap/argocd/kustomization.yaml) | Clúster k3s ([0001-eleccion-k3s](adr/0001-eleccion-k3s.md)) |
 | Root app | [bootstrap/root-app.yaml](../gitops/bootstrap/root-app.yaml) | Argo CD |
+| demo-app | [apps/demo-app/](../gitops/apps/demo-app/deployment.yaml) | Traefik (Ingress) |
 | Traefik | `gitops/platform/traefik/` | k3s (Traefik integrado desactivado, ver [0001-eleccion-k3s](adr/0001-eleccion-k3s.md)) |
-| cert-manager | `gitops/platform/cert-manager/` | Traefik (TLS de los Ingress) |
-| Monitoring | `gitops/platform/monitoring/` | Rol `node_exporter` en los hosts |
-| Loki | `gitops/platform/loki/` | Monitoring (Grafana) |
-| Velero | `gitops/platform/velero/` | Almacenamiento de copias, ver [restauracion](runbooks/restauracion.md) |
+| cert-manager *(previsto)* | `gitops/platform/cert-manager/` | Traefik (TLS de los Ingress) |
+| Monitoring *(previsto)* | `gitops/platform/monitoring/` | Rol `node_exporter` en los hosts |
+| Loki *(previsto)* | `gitops/platform/loki/` | Monitoring (Grafana) |
+| Velero *(previsto)* | `gitops/platform/velero/` | Almacenamiento de copias, ver [restauracion](runbooks/restauracion.md) |
 | demo-app | `gitops/apps/demo-app/` | Plataforma desplegada |
 
 Las ApplicationSets [platform.yaml](../gitops/appsets/platform.yaml) y [apps.yaml](../gitops/appsets/apps.yaml) generan una `Application` por cada subdirectorio de `platform/` y `apps/`.
@@ -110,13 +113,17 @@ Las ApplicationSets [platform.yaml](../gitops/appsets/platform.yaml) y [apps.yam
 
 Decisión: [0004-gestion-secretos-sops](adr/0004-gestion-secretos-sops.md): reglas en [.sops.yaml](../.sops.yaml); ficheros cifrados en [secrets/](../secrets/).
 
+- Solo se cifran los valores, así que los cambios se pueden revisar en Git.
+- Ansible los descifra en el equipo de administración con el lookup `community.sops.sops`.
+- Primer secreto: contraseña de admin de Warpgate ([secrets/warpgate.sops.yaml](../secrets/warpgate.sops.yaml)).
+
 ## CI y seguridad
 
-| Workflow | Función prevista | Estado |
+| Workflow | Función | Estado |
 |---|---|---|
-| [terraform.yml](../.github/workflows/terraform.yml) | `fmt`, `validate`, `plan` | Placeholder |
-| [ansible.yml](../.github/workflows/ansible.yml) | `ansible-lint`, sintaxis | Placeholder |
-| [security.yml](../.github/workflows/security.yml) | Análisis de IaC y detección de secretos | Placeholder |
+| [terraform.yml](../.github/workflows/terraform.yml) | `fmt -check` y `validate`, sin credenciales | ✅ En cada PR que toca `terraform/` |
+| [ansible.yml](../.github/workflows/ansible.yml) | `ansible-lint` (incluye `syntax-check`) | ✅ En cada PR que toca `ansible/` |
+| [security.yml](../.github/workflows/security.yml) | gitleaks sobre todo el historial y hooks de pre-commit | ✅ Obligatorio para fusionar en `main` |
 
 Validaciones locales con [.pre-commit-config.yaml](../.pre-commit-config.yaml).
 

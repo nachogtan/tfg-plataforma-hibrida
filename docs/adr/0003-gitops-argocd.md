@@ -21,7 +21,7 @@ Se usa **Argo CD** con este esquema:
 
 | Pieza | Ruta | Función |
 |---|---|---|
-| Instalación de Argo CD | [bootstrap/argocd/kustomization.yaml](../../gitops/bootstrap/argocd/kustomization.yaml), [values.yaml](../../gitops/bootstrap/argocd/values.yaml) | Se aplica una sola vez desde [bootstrap.sh](../../scripts/bootstrap.sh) |
+| Instalación de Argo CD | [bootstrap/argocd/kustomization.yaml](../../gitops/bootstrap/argocd/kustomization.yaml) | Se aplica una sola vez desde [bootstrap.sh](../../scripts/bootstrap.sh) |
 | Root application | [bootstrap/root-app.yaml](../../gitops/bootstrap/root-app.yaml) | Patrón *App of Apps*: apunta a `gitops/appsets/` |
 | ApplicationSet de plataforma | [appsets/platform.yaml](../../gitops/appsets/platform.yaml) | Una `Application` por directorio en `gitops/platform/*` |
 | ApplicationSet de aplicaciones | [appsets/apps.yaml](../../gitops/appsets/apps.yaml) | Una `Application` por directorio en `gitops/apps/*` |
@@ -30,7 +30,7 @@ Componentes de plataforma y su relación con la infraestructura base:
 
 - `traefik`: Ingress controller; sustituye al Traefik integrado de k3s.
 - `cert-manager`: certificados TLS para los Ingress.
-- `monitoring`: - `monitoring`: kube-prometheus-stack (Prometheus, Grafana, Alertmanager). Los nodos k3s se monitorizan con el node-exporter que incluye el chart; las VMs fuera del clúster (`core-01`, `cloud-01`, PBS) con el rol Ansible `node_exporter`.
+- `monitoring`: kube-prometheus-stack (Prometheus, Grafana, Alertmanager). Los nodos k3s se monitorizan con el node-exporter que incluye el chart; las VMs fuera del clúster (`core-01`, `cloud-01`, PBS) con el rol Ansible `node_exporter`.
 - `loki`: agregación de logs.
 - `velero`: copias de seguridad del clúster (ver [restauracion](../runbooks/restauracion.md)).
 
@@ -52,6 +52,21 @@ Componentes de plataforma y su relación con la infraestructura base:
 - ⚠️ El orden de arranque entre componentes (p. ej. CRDs de cert-manager) debe controlarse con *sync waves*.
 - ⚠️ El rol Ansible `k3s` debe instalar k3s con `--disable traefik` para evitar dos
   Ingress controllers.
+
+## Actualización (2026-10-09)
+
+Implementación real, que difiere en algunos puntos de la decisión inicial:
+
+| Pieza | Implementación |
+|---|---|
+| Instalación de Argo CD | **Kustomize** sobre el manifiesto oficial de la v3.5.3 (sin Helm), con un parche para `server.insecure` (el TLS lo termina Traefik) |
+| Argo CD gestionado por sí mismo | [appsets/argocd.yaml](../../gitops/appsets/argocd.yaml): `ServerSideApply=true` y `prune: false`, para no borrar por error sus propios recursos |
+| Plataforma | [appsets/platform.yaml](../../gitops/appsets/platform.yaml) es una `Application` (no un ApplicationSet) que recorre `gitops/platform/*/application.yaml` |
+| Aplicaciones | [appsets/apps.yaml](../../gitops/appsets/apps.yaml) sí es un ApplicationSet: una `Application` por carpeta de `gitops/apps/` |
+
+- Sincronización automática con `prune: true` (borra del clúster lo que se quita de Git) y
+  `selfHeal: true` (revierte los cambios manuales); verificado el 2026-10-06.
+- De los componentes de plataforma, solo **Traefik** está desplegado; el resto sigue previsto.
 
 ## Relacionado
 
