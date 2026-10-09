@@ -53,6 +53,7 @@ operativos, las pruebas y el diario de trabajo.
 - [Reconstrucción 2](pruebas/2026-10-04-reconstruccion-2.md): VM y configuración base (9 min 26 s).
 - [Reconstrucción 3](pruebas/2026-10-05-reconstruccion-3.md): + firewall, k3s y kubectl (8 min 35 s).
 - [Reconstrucción 4](pruebas/2026-10-07-reconstruccion-4.md): plataforma completa con `make rebuild` (5 min 25 s).
+- [Reconstrucción 5](pruebas/2026-10-09-reconstruccion-5.md): + Warpgate, SOPS y TOTP, sin pasos manuales (6 min 33 s).
 
 ## Diario de trabajo
 
@@ -64,6 +65,7 @@ operativos, las pruebas y el diario de trabajo.
 - [2026-10-06](diario/2026-10-06.md): repositorio público, Argo CD, Traefik e Ingress.
 - [2026-10-07](diario/2026-10-07.md): reconstrucción 4 y CI real en GitHub Actions.
 - [2026-10-08](diario/2026-10-08.md): `core-01`, SOPS + age y bastión Warpgate configurado por API.
+- [2026-10-09](diario/2026-10-09.md): documentación al día, contraseña de Argo CD con SOPS, TOTP y reconstrucción 5.
 
 ## Otros recursos
 

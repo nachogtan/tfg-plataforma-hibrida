@@ -18,8 +18,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Seguridad
 
-- [ ] Copia de seguridad de la clave `age` (`~/.config/sops/age/keys.txt`) y de la contraseña de
-      admin de Warpgate en un gestor de contraseñas.
 - [ ] Caducidad de la clave en el agente (`ssh-add -t`); opcional, clave FIDO2 `ed25519-sk`.
 - [ ] Usuario de API propio para Ansible en Warpgate (por ejemplo, `ansible-api`) con un rol de
       administración limitado, para distinguir en la auditoría la automatización del acceso humano.
@@ -36,7 +34,12 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] DNS interno en lugar de sslip.io para los servicios con credenciales (Argo CD, Warpgate…),
       con certificados válidos emitidos por cert-manager.
 
-## Kubernetes y red
+## Red
+
+- [ ] Decidir e implementar la VPN en malla (NetBird o Tailscale) para unir on-prem y cloud y
+      dar una IP fija al equipo de administración.
+
+## Kubernetes
 
 - [ ] Modo *agent* en el rol `k3s` para unir nodos al clúster: hoy solo instala un servidor
       (ver [añadir-nodo](runbooks/añadir-nodo.md)).
@@ -55,7 +58,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Documentación
 
-- [ ] Índice de la memoria del TFG y qué material del repositorio alimenta cada capítulo.
+- [ ] Índice de la memoria del TFG y qué material del repositorio alimenta cada capítulo (en curso).
 - [ ] Revisión general de formato del repositorio antes de la entrega.
 
 ## Completados
@@ -83,7 +86,9 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Bastión Warpgate en `core-01` con rol de Ansible. (2026-10-08, PR #37)
 - [x] Acceso SSH a las VMs a través de Warpgate. (2026-10-08, PR #38)
 - [x] Configuración de Warpgate como código con su API; probada recreando `core-01` (47 s). (2026-10-08, PR #39)
-- [x] Documentación al día tras la auditoría: README, mapa, arquitectura, ADR, runbooks y diarios. (2026-10-09)
-- [x] Revisión del ADR-0003 (Kustomize, `prune`, `selfHeal` y `ServerSideApply`). (2026-10-09)
-- [x] Contraseña de `admin` de Argo CD declarativa con SOPS: `make rebuild` sin pasos manuales. (2026-10-09)
-- [x] TOTP en Warpgate para el acceso SSH (clave pública + código), con el secreto cifrado con SOPS. (2026-10-09)
+- [x] Documentación al día tras la auditoría: README, mapa, arquitectura, ADR, runbooks y diarios. (2026-10-09, PR #41)
+- [x] Revisión del ADR-0003 (Kustomize, `prune`, `selfHeal` y `ServerSideApply`). (2026-10-09, PR #41)
+- [x] Contraseña de `admin` de Argo CD declarativa con SOPS: `make rebuild` sin pasos manuales. (2026-10-09, PR #42)
+- [x] TOTP en Warpgate para el acceso SSH (clave pública + código), con el secreto cifrado con SOPS. (2026-10-09, PR #43)
+- [x] Copia de seguridad de la clave `age` y de la passphrase SSH en el gestor de contraseñas. (2026-10-09)
+- [x] Reconstrucción 5: plataforma completa sin pasos manuales en 6 min 33 s. (2026-10-09)
