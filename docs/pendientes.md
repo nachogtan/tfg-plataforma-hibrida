@@ -32,6 +32,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       `core-01` a la LAN.
 - [ ] Claves de host fijas para Warpgate (`--import-ssh-host-keys`, cifradas con SOPS) para que su
       huella no cambie al recrear `core-01`.
+- [ ] Hook de pre-commit que compruebe que los ficheros de `secrets/` están cifrados con SOPS.
 - [ ] Certificado válido para Warpgate (puerto 8888) y `warpgate_api_validate_certs: true`.
 - [ ] Usuario SSH dedicado con permisos mínimos para Terraform en Proxmox, en lugar de root.
 - [ ] Endurecer el SSH del nodo Proxmox (`PermitRootLogin prohibit-password`, sin contraseñas).
@@ -40,10 +41,11 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       disponible), para no tener que cambiarla a mano tras cada reconstrucción.
 - [ ] DNS interno en lugar de sslip.io para los servicios con credenciales (Argo CD, Warpgate…),
       con certificados válidos emitidos por cert-manager.
-- [ ] Revisar el `ADR-0003` (Kustomize en lugar de Helm, `prune` y `ServerSideApply`).
 
 ## Kubernetes y red
 
+- [ ] Modo *agent* en el rol `k3s` para unir nodos al clúster: hoy solo instala un servidor
+      (ver [añadir-nodo](runbooks/añadir-nodo.md)).
 - [ ] Puertos para clúster de varios nodos: `10250/tcp`, `8472/udp` (Flannel) y `2379-2380/tcp` (etcd).
 - [ ] Vigilar la política `deny (routed)` de UFW al escalar a varios nodos y al publicar aplicaciones.
 - [ ] Renombrar los contextos del kubeconfig (`tfg-onprem`, `tfg-cloud`) cuando exista el clúster cloud.
@@ -59,13 +61,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Documentación
 
-- [ ] Corregir lo detectado en la auditoría del 2026-10-08: enlace roto del ADR-0003 a `values.yaml`;
-      `docs/README.md`, diagrama y tabla del `README.md`, ADR-0001/0003/0004 y tabla de CI de
-      `arquitectura.md` desactualizados; aviso y `ansible-galaxy collection install` en
-      puesta-en-marcha; bloques duplicados en configuracion-inicial; restauracion supone un backend
-      remoto de Terraform (`backend.tf` vacío); enlace ↑ en los diarios anteriores.
-- [ ] Comentario obsoleto sobre el agente QEMU en `terraform/modules/proxmox-vm/main.tf` (ya lo
-      instala cloud-init).
 - [ ] Índice de la memoria del TFG y qué material del repositorio alimenta cada capítulo.
 - [ ] Revisión general de formato del repositorio antes de la entrega.
 
@@ -94,3 +89,5 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Bastión Warpgate en `core-01` con rol de Ansible. (2026-10-08, PR #37)
 - [x] Acceso SSH a las VMs a través de Warpgate. (2026-10-08, PR #38)
 - [x] Configuración de Warpgate como código con su API; probada recreando `core-01` (47 s). (2026-10-08, PR #39)
+- [x] Documentación al día tras la auditoría: README, mapa, arquitectura, ADR, runbooks y diarios. (2026-10-09)
+- [x] Revisión del ADR-0003 (Kustomize, `prune`, `selfHeal` y `ServerSideApply`). (2026-10-09)
