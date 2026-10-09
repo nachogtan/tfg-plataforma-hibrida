@@ -115,7 +115,8 @@ Decisión: [0004-gestion-secretos-sops](adr/0004-gestion-secretos-sops.md): regl
 
 - Solo se cifran los valores, así que los cambios se pueden revisar en Git.
 - Ansible los descifra en el equipo de administración con el lookup `community.sops.sops`.
-- Primer secreto: contraseña de admin de Warpgate ([secrets/warpgate.sops.yaml](../secrets/warpgate.sops.yaml)).
+- Secretos actuales: contraseña de admin de Warpgate ([secrets/warpgate.sops.yaml](../secrets/warpgate.sops.yaml))
+  y de Argo CD ([secrets/argocd.sops.yaml](../secrets/argocd.sops.yaml), aplicada por `bootstrap.sh`).
 
 ## CI y seguridad
 

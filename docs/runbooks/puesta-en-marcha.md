@@ -136,15 +136,15 @@ Las fases siguientes describen lo que hace cada paso por separado.
    Debe responder `whoami` con el nombre del pod (`Hostname`). Repetir para ver el reparto entre réplicas.
 5. Acceder a la interfaz web de Argo CD en `https://argocd.<IP_K3S>.sslip.io`.
    Traefik usa un certificado autofirmado: aceptar el aviso del navegador. Usuario `admin`.
-   - Primer acceso tras una instalación nueva: obtener la contraseña inicial.
+   - La contraseña la aplica `bootstrap.sh` desde [secrets/argocd.sops.yaml](../../secrets/argocd.sops.yaml)
+     (hash bcrypt) y elimina `argocd-initial-admin-secret`: no hay que cambiarla a mano. Para consultarla:
 ```bash
-   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 -d; echo
+   sops decrypt --extract '["argocd_admin_password"]' secrets/argocd.sops.yaml | wl-copy
 ```
    - Vaciar el campo de contraseña antes de pegarla: el navegador puede autorrellenar la de una
      instalación anterior. Tras 5 fallos, Argo CD bloquea `admin` unos 5 minutos (`too many failed logins`).
-   - Cambiarla en *User Info → Update Password* y comprobar que el secreto inicial ya no existe
-     (`kubectl -n argocd get secrets`); si sigue, borrarlo con
-     `kubectl -n argocd delete secret argocd-initial-admin-secret`.
+   - Cambiar la contraseña: regenerar `secrets/argocd.sops.yaml` (contraseña + hash bcrypt) y ejecutar
+     `make bootstrap`, que solo aplica el hash si difiere del del clúster.
    - Sin Ingress (acceso de emergencia): `kubectl -n argocd port-forward svc/argocd-server 8080:80`
      y abrir http://localhost:8080.
 

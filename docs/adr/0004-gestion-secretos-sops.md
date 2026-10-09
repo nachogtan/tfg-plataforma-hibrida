@@ -62,7 +62,10 @@ Implementado para la capa de Ansible:
   `community.sops` 2.5.0). Se descartó `community.sops.load_vars` porque inyecta los secretos como
   *facts*, un mecanismo obsoleto que desaparece en ansible-core 2.24.
 - La CI no tiene la clave `age`: valida la sintaxis sin descifrar nada.
-- Pendiente: secretos de Kubernetes (contraseña de Argo CD) y de Terraform.
+- 2026-10-09: contraseña de admin de Argo CD ([secrets/argocd.sops.yaml](../../secrets/argocd.sops.yaml)).
+  [bootstrap.sh](../../scripts/bootstrap.sh) aplica su hash bcrypt a `argocd-secret` solo si difiere
+  del del clúster. Es un secreto de arranque: lo aplica el script, no Argo CD.
+- Pendiente: el resto de secretos de Kubernetes (integración con Argo CD) y los de Terraform.
 
 ## Relacionado
 
