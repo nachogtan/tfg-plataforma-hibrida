@@ -3,6 +3,9 @@
 - name: Configuración base
   ansible.builtin.import_playbook: base.yml
 
+- name: VPN en malla (NetBird)
+  ansible.builtin.import_playbook: netbird.yml
+
 - name: Clúster k3s
   ansible.builtin.import_playbook: k3s.yml
 

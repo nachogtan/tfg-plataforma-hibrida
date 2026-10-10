@@ -1,0 +1,7 @@
+---
+# Cliente de NetBird en todas las VMs: las une a la malla VPN (ADR-0005)
+- name: VPN en malla (cliente de NetBird)
+  hosts: all
+  become: true
+  roles:
+    - netbird

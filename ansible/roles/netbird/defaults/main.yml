@@ -1,0 +1,16 @@
+---
+# Versión fijada del cliente de NetBird (paquete APT, verificada el 2026-10-10)
+netbird_version: "0.80.0"
+
+# Repositorio APT oficial y su clave de firma, fijada por SHA-256
+# (clave rsa3072 EFE37DF047DF7CCDF1FC54FA83F79AD029778355, "Wiretrustee <dev@wiretrustee.com>")
+netbird_apt_key_url: https://pkgs.netbird.io/debian/public.key
+netbird_apt_key_sha256: 6bd434c07e7c3a71211de79ca287e93b45deadedc4b74f1a2e83e11abe6e0bf5
+netbird_apt_key_path: /usr/share/keyrings/netbird-archive-keyring.asc
+
+# Plano de control: NetBird Cloud en la fase 1 (ADR-0005)
+netbird_management_url: https://api.netbird.io:443
+
+# Setup key cifrada con SOPS (se descifra en el equipo de administración)
+netbird_secrets_file: "{{ playbook_dir }}/../../secrets/netbird.sops.yaml"
+netbird_setup_key: "{{ lookup('community.sops.sops', netbird_secrets_file, extract='[\"netbird_setup_key\"]') }}"

@@ -1,0 +1,51 @@
+---
+- name: Descargar la clave de firma del repositorio de NetBird (SHA-256 verificado)
+  ansible.builtin.get_url:
+    url: "{{ netbird_apt_key_url }}"
+    dest: "{{ netbird_apt_key_path }}"
+    checksum: "sha256:{{ netbird_apt_key_sha256 }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Añadir el repositorio APT de NetBird (formato deb822, sin gpg)
+  ansible.builtin.deb822_repository:
+    name: netbird
+    types: deb
+    uris: https://pkgs.netbird.io/debian
+    suites: stable
+    components: main
+    signed_by: "{{ netbird_apt_key_path }}"
+
+- name: Instalar el cliente de NetBird (versión fijada)
+  ansible.builtin.apt:
+    name: "netbird={{ netbird_version }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Bloquear la versión para que las actualizaciones automáticas no la cambien
+  ansible.builtin.dpkg_selections:
+    name: netbird
+    selection: hold
+
+- name: Asegurar que el servicio está activo y arranca con el sistema
+  ansible.builtin.systemd_service:
+    name: netbird
+    enabled: true
+    state: started
+
+- name: Comprobar si el equipo ya está registrado en NetBird
+  ansible.builtin.command: netbird status
+  register: netbird_status
+  changed_when: false
+  failed_when: false
+
+- name: Registrar el equipo con la setup key (solo si no está conectado)
+  ansible.builtin.command:
+    cmd: netbird up --management-url {{ netbird_management_url }}
+  environment:
+    NB_SETUP_KEY: "{{ netbird_setup_key }}"
+  when: "'Management: Connected' not in netbird_status.stdout"
+  changed_when: true
+  no_log: true
