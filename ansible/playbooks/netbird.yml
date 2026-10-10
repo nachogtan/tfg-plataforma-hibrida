@@ -5,3 +5,15 @@
   become: true
   roles:
     - netbird
+
+# Grupos y políticas de la malla (API de NetBird, desde el equipo de administración)
+- name: Grupos y políticas de NetBird
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Aplicar la configuración declarativa (group_vars/all.yml)
+      ansible.builtin.include_role:
+        name: netbird
+        tasks_from: api
+      when: not ansible_check_mode

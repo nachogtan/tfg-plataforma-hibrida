@@ -1,0 +1,108 @@
+---
+# Grupos y políticas de NetBird declarados en group_vars/all.yml, aplicados con la API REST.
+# Crea lo que falta, actualiza lo que difiere y borra las políticas de netbird_policies_disabled.
+- name: API NetBird | Configuración declarativa
+  module_defaults:
+    ansible.builtin.uri:
+      headers:
+        Authorization: "Token {{ netbird_api_token }}"
+      body_format: json
+  vars:
+    netbird_peer_ids: "{{ netbird_api_peers.json | items2dict(key_name='name', value_name='id') }}"
+    netbird_group_ids: "{{ netbird_api_groups.json | items2dict(key_name='name', value_name='id') }}"
+    netbird_policy_by_name: "{{ netbird_api_policies.json | items2dict(key_name='name', value_name='rules') }}"
+  no_log: "{{ netbird_api_no_log }}"
+  block:
+    # --- Equipos y grupos ---
+    - name: API NetBird | Leer los equipos (nombre → id)
+      ansible.builtin.uri:
+        url: "{{ netbird_api_url }}/peers"
+      register: netbird_api_peers
+
+    - name: API NetBird | Leer los grupos
+      ansible.builtin.uri:
+        url: "{{ netbird_api_url }}/groups"
+      register: netbird_api_groups
+
+    - name: API NetBird | Crear los grupos que falten
+      ansible.builtin.uri:
+        url: "{{ netbird_api_url }}/groups"
+        method: POST
+        body:
+          name: "{{ item.name }}"
+          peers: "{{ item.peers | default([]) | map('extract', netbird_peer_ids) | list }}"
+      loop: "{{ netbird_groups | rejectattr('name', 'in', netbird_group_ids) }}"
+      loop_control:
+        label: "{{ item.name }}"
+      changed_when: true
+
+    - name: API NetBird | Releer los grupos (nombre → id)
+      ansible.builtin.uri:
+        url: "{{ netbird_api_url }}/groups"
+      register: netbird_api_groups
+
+    - name: API NetBird | Ajustar los miembros de los grupos que los declaran
+      ansible.builtin.uri:
+        url: "{{ netbird_api_url }}/groups/{{ netbird_group_ids[item.name] }}"
+        method: PUT
+        body:
+          name: "{{ item.name }}"
+          peers: "{{ item.peers | map('extract', netbird_peer_ids) | list }}"
+      vars:
+        netbird_current_peers: >-
+          {{ (netbird_api_groups.json | selectattr('name', 'equalto', item.name) | first).peers
+             | default([], true) | map(attribute='name') | sort }}
+      loop: "{{ netbird_groups | selectattr('peers', 'defined') }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: netbird_current_peers != (item.peers | sort)
+      changed_when: true
+
+    # --- Políticas ---
+    - name: API NetBird | Leer las políticas
+      ansible.builtin.uri:
+        url: "{{ netbird_api_url }}/policies"
+      register: netbird_api_policies
+
+    - name: API NetBird | Crear o actualizar las políticas declaradas
+      ansible.builtin.uri:
+        url: >-
+          {{ netbird_api_url }}/policies{{ ('/' ~ netbird_current.id) if netbird_current else '' }}
+        method: "{{ 'PUT' if netbird_current else 'POST' }}"
+        body:
+          name: "{{ item.name }}"
+          description: "{{ item.description | default('') }}"
+          enabled: true
+          rules:
+            - name: "{{ item.name }}"
+              enabled: true
+              action: accept
+              bidirectional: false
+              protocol: "{{ item.protocol }}"
+              ports: "{{ item.ports }}"
+              sources: "{{ item.sources | map('extract', netbird_group_ids) | list }}"
+              destinations: "{{ item.destinations | map('extract', netbird_group_ids) | list }}"
+      vars:
+        netbird_current: >-
+          {{ netbird_api_policies.json | selectattr('name', 'equalto', item.name) | first | default({}) }}
+        netbird_current_rule: "{{ (netbird_current.rules | default([{}]))[0] }}"
+      loop: "{{ netbird_policies }}"
+      loop_control:
+        label: "{{ item.name }}"
+      when: >-
+        not netbird_current
+        or not netbird_current.enabled
+        or netbird_current_rule.protocol != item.protocol
+        or (netbird_current_rule.ports | default([]) | sort) != (item.ports | sort)
+        or (netbird_current_rule.sources | map(attribute='name') | sort) != (item.sources | sort)
+        or (netbird_current_rule.destinations | map(attribute='name') | sort) != (item.destinations | sort)
+      changed_when: true
+
+    - name: API NetBird | Borrar las políticas que no deben existir (p. ej. Default)
+      ansible.builtin.uri:
+        url: "{{ netbird_api_url }}/policies/{{ item.id }}"
+        method: DELETE
+      loop: "{{ netbird_api_policies.json | selectattr('name', 'in', netbird_policies_disabled) }}"
+      loop_control:
+        label: "{{ item.name }}"
+      changed_when: true

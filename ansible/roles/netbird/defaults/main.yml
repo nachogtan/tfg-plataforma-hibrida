@@ -14,3 +14,11 @@ netbird_management_url: https://api.netbird.io:443
 # Setup key cifrada con SOPS (se descifra en el equipo de administración)
 netbird_secrets_file: "{{ playbook_dir }}/../../secrets/netbird.sops.yaml"
 netbird_setup_key: "{{ lookup('community.sops.sops', netbird_secrets_file, extract='[\"netbird_setup_key\"]') }}"
+
+# API de NetBird (grupos y políticas, tasks/api.yml) con el token del usuario de servicio
+netbird_api_url: https://api.netbird.io/api
+netbird_api_token: "{{ lookup('community.sops.sops', netbird_secrets_file, extract='[\"netbird_api_token\"]') }}"
+netbird_api_no_log: true          # false solo para depurar: mostraría el token
+netbird_groups: []
+netbird_policies: []
+netbird_policies_disabled: []

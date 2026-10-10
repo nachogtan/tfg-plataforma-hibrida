@@ -1,0 +1,22 @@
+---
+# Configuración declarativa de la malla NetBird, aplicada con su API (rol netbird, tasks/api.yml).
+# Todo lo que no permita una política está denegado.
+
+# Grupos. "peers" fija los miembros por nombre de equipo en NetBird; los grupos sin "peers"
+# los rellena NetBird (las VMs entran en "onprem" automáticamente con la setup key).
+netbird_groups:
+  - name: admin
+    peers: [fedora]          # equipo de administración
+  - name: onprem
+
+# Políticas: "sources" inicia conexiones hacia "destinations" (unidireccional)
+netbird_policies:
+  - name: admin-a-onprem
+    description: Administración de las VMs on-prem desde el equipo de administración
+    sources: [admin]
+    destinations: [onprem]
+    protocol: tcp
+    ports: ["22", "80", "443", "2222", "6443", "8888"]
+
+# Políticas que deben quedar desactivadas ("Default" permite todo entre todos)
+netbird_policies_disabled: [Default]
