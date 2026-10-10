@@ -31,6 +31,7 @@ flowchart LR
 | Orquestación | k3s `v1.36.5+k3s1` | Kubernetes ligero, sin Traefik integrado |
 | GitOps | Argo CD v3.5.3 | App of Apps: Traefik, aplicaciones e Ingress desde Git |
 | Acceso | Warpgate v0.29.2 | Bastión SSH con roles y grabación de sesiones, configurado por API |
+| Red | NetBird 0.80.0 | VPN en malla (WireGuard); grupos y políticas por API |
 | Secretos | SOPS + age | Secretos cifrados en el repositorio |
 | Calidad | pre-commit, GitHub Actions | Formato, validación y detección de secretos |
 
@@ -62,6 +63,7 @@ Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md).
 - CI sin credenciales en cada PR (gitleaks sobre todo el historial y hooks de pre-commit), obligatoria para fusionar en `main`.
 - Token de API de Proxmox con permisos mínimos; permisos de borrado limitados al almacenamiento de imágenes.
 - SSH solo con clave pública, sin acceso de `root` ni contraseñas.
+- VPN en malla NetBird sin puertos abiertos en el router; política de denegación por defecto.
 - Acceso SSH humano centralizado en el bastión Warpgate: roles, clave pública + TOTP y sesiones grabadas.
 - Secretos versionados cifrados con SOPS + age; la clave privada nunca entra en el repositorio.
 - Firewall UFW con política de entrada denegada: solo SSH, la API de Kubernetes y las redes internas del clúster.
@@ -94,7 +96,7 @@ docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
 - [x] GitOps con Argo CD (App of Apps) y aplicación de demostración
 - [x] Ingress con Traefik e interfaz de Argo CD por HTTPS
 - [x] Bastión SSH Warpgate con configuración declarativa por API
-- [ ] VPN en malla (NetBird)
+- [x] VPN en malla con NetBird (fase 1: plano de control en NetBird Cloud)
 - [ ] Entorno cloud y clúster de varios nodos
 - [x] CI en GitHub Actions: Terraform, Ansible, gitleaks y pre-commit en cada PR
 - [x] Gestión de secretos con SOPS + age

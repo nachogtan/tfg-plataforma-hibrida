@@ -76,12 +76,15 @@ Decisiones: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separ
 |---|---|---|
 | [site.yml](../ansible/playbooks/site.yml) | Orquesta los demás playbooks | — |
 | [base.yml](../ansible/playbooks/base.yml) | Todos los hosts | `common`, `hardening` (previsto: `node_exporter`) |
-| [core.yml](../ansible/playbooks/core.yml) | Grupo `core` ([group_vars](../ansible/inventories/onprem/group_vars/core.yml)) | `warpgate` (previstos: `docker`, `netbird`, `authentik`) |
+| [core.yml](../ansible/playbooks/core.yml) | Grupo `core` ([group_vars](../ansible/inventories/onprem/group_vars/core.yml)) | `warpgate` (previstos: `docker`, `authentik`) |
+| [netbird.yml](../ansible/playbooks/netbird.yml) | Todos los hosts + `localhost` (API) | `netbird` |
 | [k3s.yml](../ansible/playbooks/k3s.yml) | Grupo `k3s` ([group_vars](../ansible/inventories/onprem/group_vars/k3s.yml)) | `k3s` |
 
 Servicios de la capa *core* (fuera del clúster):
 
-- **NetBird** *(previsto)*: malla VPN (WireGuard) que une on-prem y cloud.
+- **NetBird** (implementado, fase 1): VPN en malla (WireGuard) con el plano de control en NetBird
+  Cloud; cliente en todas las VMs y grupos y políticas por API. Ver [acceso-vpn](runbooks/acceso-vpn.md)
+  y [0005-vpn-netbird](adr/0005-vpn-netbird.md).
 - **Warpgate** (implementado en `core-01`): bastión SSH con control de acceso por roles, doble factor
   (clave pública + TOTP) y grabación de sesiones. Es el único acceso SSH humano a las VMs; usuarios, roles, destinos y huellas se
   declaran en [group_vars/core.yml](../ansible/inventories/onprem/group_vars/core.yml) y se aplican

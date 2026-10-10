@@ -23,7 +23,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       administración limitado, para distinguir en la auditoría la automatización del acceso humano.
 - [ ] TOTP en el panel web de Warpgate para `admin` (requiere antes el usuario de API para Ansible).
 - [ ] Restringir el puerto 22 de las VMs a `core-01` y al equipo de administración, usando la IP fija
-      de la VPN (NetBird o Tailscale, por decidir); después, cerrar también el 22 de `core-01` a la LAN.
+      del equipo de administración en NetBird; después, cerrar también el 22 de `core-01` a la LAN.
 - [ ] Claves de host fijas para Warpgate (`--import-ssh-host-keys`, cifradas con SOPS) para que su
       huella no cambie al recrear `core-01`.
 - [ ] Hook de pre-commit que compruebe que los ficheros de `secrets/` están cifrados con SOPS.
@@ -36,8 +36,10 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Red
 
-- [ ] Decidir e implementar la VPN en malla (NetBird o Tailscale) para unir on-prem y cloud y
-      dar una IP fija al equipo de administración.
+- [ ] VPN fase 2: plano de control de NetBird autoalojado en una VM de AWS.
+- [ ] Añadir Proxmox y el móvil (app de NetBird + Termux) a la malla, con políticas propias.
+- [ ] Gestionar por la API el ajuste *Lazy connections* y borrar equipos antiguos tras `make rebuild`.
+- [ ] Rotar la setup key y el token de la API de NetBird (caducan a los 60 días).
 
 ## Kubernetes
 
@@ -92,3 +94,5 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] TOTP en Warpgate para el acceso SSH (clave pública + código), con el secreto cifrado con SOPS. (2026-10-09, PR #43)
 - [x] Copia de seguridad de la clave `age` y de la passphrase SSH en el gestor de contraseñas. (2026-10-09)
 - [x] Reconstrucción 5: plataforma completa sin pasos manuales en 6 min 33 s. (2026-10-09)
+- [x] ADR-0005 y VPN en malla con NetBird (fase 1): cliente en las VMs, equipo de administración y
+      políticas por API sin la política Default. (2026-10-10)

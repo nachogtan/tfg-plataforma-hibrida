@@ -10,9 +10,9 @@ para extenderse a la nube). Desde aquí se enlazan las decisiones de arquitectur
 operativos, las pruebas y el diario de trabajo.
 
 > [!NOTE]
-> **Estado (2026-10-09):** entorno on-premise operativo y reproducible: VMs con Terraform, configuración
-> y hardening con Ansible, clúster k3s, GitOps con Argo CD, bastión Warpgate y secretos con SOPS.
-> Pendiente: entorno cloud, VPN, monitorización y copias de seguridad ([pendientes](pendientes.md)).
+> **Estado (2026-10-10):** entorno on-premise operativo y reproducible: VMs con Terraform, configuración
+> y hardening con Ansible, clúster k3s, GitOps con Argo CD, bastión Warpgate, secretos con SOPS
+> y VPN en malla con NetBird. Pendiente: entorno cloud, monitorización y copias de seguridad ([pendientes](pendientes.md)).
 
 ## Visión general
 
@@ -38,12 +38,14 @@ operativos, las pruebas y el diario de trabajo.
 - [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separacion.md): Terraform provisiona, Ansible configura.
 - [0003-gitops-argocd](adr/0003-gitops-argocd.md): Argo CD con el patrón *App of Apps*.
 - [0004-gestion-secretos-sops](adr/0004-gestion-secretos-sops.md): SOPS + age para cifrar secretos versionados.
+- [0005-vpn-netbird](adr/0005-vpn-netbird.md): VPN en malla con NetBird (plano de control en SaaS en la fase 1).
 
 ## Runbooks
 
 - [configuracion-inicial](runbooks/configuracion-inicial.md): requisitos del equipo de administración y de Proxmox.
 - [puesta-en-marcha](runbooks/puesta-en-marcha.md): despliegue completo desde cero.
 - [acceso-warpgate](runbooks/acceso-warpgate.md): acceso SSH a las VMs a través del bastión.
+- [acceso-vpn](runbooks/acceso-vpn.md): VPN en malla con NetBird (equipos, políticas y rotación).
 - [añadir-nodo](runbooks/añadir-nodo.md): ampliar el clúster k3s con un nodo nuevo.
 - [restauracion](runbooks/restauracion.md): recuperación ante desastres.
 
@@ -66,6 +68,7 @@ operativos, las pruebas y el diario de trabajo.
 - [2026-10-07](diario/2026-10-07.md): reconstrucción 4 y CI real en GitHub Actions.
 - [2026-10-08](diario/2026-10-08.md): `core-01`, SOPS + age y bastión Warpgate configurado por API.
 - [2026-10-09](diario/2026-10-09.md): documentación al día, contraseña de Argo CD con SOPS, TOTP y reconstrucción 5.
+- [2026-10-10](diario/2026-10-10.md): ADR-0005 y VPN en malla con NetBird (clientes y políticas por API).
 
 ## Otros recursos
 
