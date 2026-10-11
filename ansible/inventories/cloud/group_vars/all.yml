@@ -1,0 +1,12 @@
+---
+# Variables comunes del entorno cloud.
+
+# Las VMs cloud se registran en NetBird con su propia setup key (grupo "cloud"),
+# no con la de on-prem que usa el rol por defecto.
+netbird_setup_key: "{{ lookup('community.sops.sops', netbird_secrets_file, extract='[\"netbird_setup_key_cloud\"]') }}"
+
+# Los grupos y políticas de la malla se declaran en inventories/onprem/group_vars/all.yml.
+# Aquí quedan vacíos (defaults del rol), así que el play de la API no cambia nada.
+
+# En AWS no hay Proxmox: sin agente QEMU (rol common)
+common_qemu_guest_agent: false
