@@ -17,6 +17,10 @@
       {{ (hostvars[warpgate_host].warpgate_client_keys.stdout_lines
           | select('match', '^ssh-ed25519 ') | first).split()[:2] | join(' ') }}
   tasks:
+    - name: Sin bastión en este inventario (p. ej. cloud), nada que autorizar
+      ansible.builtin.meta: end_host
+      when: "'core' not in groups"
+
     - name: Añadir la clave cliente de Warpgate a authorized_keys
       ansible.builtin.lineinfile:
         path: "/home/{{ ansible_user }}/.ssh/authorized_keys"
