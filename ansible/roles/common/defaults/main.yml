@@ -4,9 +4,12 @@ common_timezone: Europe/Madrid
 
 # Paquetes base presentes en todas las VMs
 common_packages:
-  - qemu-guest-agent
   - curl
   - ca-certificates
   - htop
   - vim
   - unattended-upgrades
+
+# Agente de invitado QEMU: solo útil en VMs de Proxmox (en AWS el hipervisor es Nitro).
+# Se desactiva en inventories/cloud.
+common_qemu_guest_agent: true

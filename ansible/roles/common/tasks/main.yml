@@ -19,7 +19,15 @@
     enabled: true
     state: started
 
-- name: Arrancar el agente QEMU
-  ansible.builtin.systemd_service:
-    name: qemu-guest-agent
-    state: started
+- name: Agente QEMU (solo VMs de Proxmox)
+  when: common_qemu_guest_agent | bool
+  block:
+    - name: Instalar el agente QEMU
+      ansible.builtin.apt:
+        name: qemu-guest-agent
+        state: present
+
+    - name: Arrancar el agente QEMU
+      ansible.builtin.systemd_service:
+        name: qemu-guest-agent
+        state: started
