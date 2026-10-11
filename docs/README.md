@@ -39,6 +39,8 @@ operativos, las pruebas y el diario de trabajo.
 - [0003-gitops-argocd](adr/0003-gitops-argocd.md): Argo CD con el patrón *App of Apps*.
 - [0004-gestion-secretos-sops](adr/0004-gestion-secretos-sops.md): SOPS + age para cifrar secretos versionados.
 - [0005-vpn-netbird](adr/0005-vpn-netbird.md): VPN en malla con NetBird (plano de control en SaaS en la fase 1).
+- [0006-aws-credenciales-sso](adr/0006-aws-credenciales-sso.md): AWS con credenciales temporales (IAM Identity Center) y mínimo privilegio.
+- [0007-vm-cloud-sin-puertos-entrada](adr/0007-vm-cloud-sin-puertos-entrada.md): VMs cloud sin puertos de entrada, administradas por NetBird.
 
 ## Runbooks
 
@@ -46,6 +48,7 @@ operativos, las pruebas y el diario de trabajo.
 - [puesta-en-marcha](runbooks/puesta-en-marcha.md): despliegue completo desde cero.
 - [acceso-warpgate](runbooks/acceso-warpgate.md): acceso SSH a las VMs a través del bastión.
 - [acceso-vpn](runbooks/acceso-vpn.md): VPN en malla con NetBird (equipos, políticas y rotación).
+- [vm-cloud](runbooks/vm-cloud.md): VMs en AWS (crear, configurar por la VPN, recrear y destruir).
 - [añadir-nodo](runbooks/añadir-nodo.md): ampliar el clúster k3s con un nodo nuevo.
 - [restauracion](runbooks/restauracion.md): recuperación ante desastres.
 

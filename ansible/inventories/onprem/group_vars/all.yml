@@ -8,6 +8,7 @@ netbird_groups:
   - name: admin
     peers: [fedora]          # equipo de administración
   - name: onprem
+  - name: cloud
 
 # Políticas: "sources" inicia conexiones hacia "destinations" (unidireccional)
 netbird_policies:
@@ -17,6 +18,13 @@ netbird_policies:
     destinations: [onprem]
     protocol: tcp
     ports: ["22", "80", "443", "2222", "6443", "8888"]
+
+  - name: admin-a-cloud
+    description: Administración de las VMs cloud (AWS) desde el equipo de administración
+    sources: [admin]
+    destinations: [cloud]
+    protocol: tcp
+    ports: ["22"]
 
 # Políticas que deben quedar desactivadas ("Default" permite todo entre todos)
 netbird_policies_disabled: [Default]

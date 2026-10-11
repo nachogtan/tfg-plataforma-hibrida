@@ -1,0 +1,30 @@
+#cloud-config
+# Primer arranque de la VM cloud: nombre, clave SSH y alta en NetBird.
+# Las rutas y el .sources son idénticos (campos y orden) a los que genera el rol
+# ansible/roles/netbird (deb822_repository), así Ansible no tiene que cambiar nada.
+hostname: ${hostname}
+
+# Clave SSH del usuario por defecto de la AMI de Debian ("admin")
+ssh_authorized_keys:
+  - ${ssh_public_key}
+
+write_files:
+  - path: /etc/apt/sources.list.d/netbird.sources
+    permissions: "0644"
+    content: |
+      Components: main
+      X-Repolib-Name: netbird
+      Signed-By: /usr/share/keyrings/netbird-archive-keyring.asc
+      Suites: stable
+      Types: deb
+      URIs: https://pkgs.netbird.io/debian
+
+runcmd:
+  - |
+    set -eu
+    curl -fsSL -o /usr/share/keyrings/netbird-archive-keyring.asc https://pkgs.netbird.io/debian/public.key
+    echo "${netbird_apt_key_sha256}  /usr/share/keyrings/netbird-archive-keyring.asc" | sha256sum -c -
+    apt-get update
+    apt-get install -y "netbird=${netbird_version}"
+    apt-mark hold netbird
+    NB_SETUP_KEY="${netbird_setup_key}" netbird up --management-url "${netbird_management_url}"

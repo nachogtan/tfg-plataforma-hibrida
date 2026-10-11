@@ -26,7 +26,7 @@ flowchart LR
 
 | Capa | Herramienta | Función |
 |---|---|---|
-| Provisión | Terraform (`bpg/proxmox`) | Imagen Debian 13, snippet de cloud-init y VMs en Proxmox |
+| Provisión | Terraform (`bpg/proxmox`, `hashicorp/aws`) | Imagen Debian 13, snippet de cloud-init y VMs en Proxmox; red y VMs en AWS |
 | Configuración | Ansible | Paquetes base, hardening SSH, firewall UFW, clúster k3s y bastión Warpgate |
 | Orquestación | k3s `v1.36.5+k3s1` | Kubernetes ligero, sin Traefik integrado |
 | GitOps | Argo CD v3.5.3 | App of Apps: Traefik, aplicaciones e Ingress desde Git |
@@ -64,6 +64,7 @@ Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md).
 - Token de API de Proxmox con permisos mínimos; permisos de borrado limitados al almacenamiento de imágenes.
 - SSH solo con clave pública, sin acceso de `root` ni contraseñas.
 - VPN en malla NetBird sin puertos abiertos en el router; política de denegación por defecto.
+- VMs cloud sin puertos de entrada; credenciales de AWS temporales (SSO) y de mínimo privilegio.
 - Acceso SSH humano centralizado en el bastión Warpgate: roles, clave pública + TOTP y sesiones grabadas.
 - Secretos versionados cifrados con SOPS + age; la clave privada nunca entra en el repositorio.
 - Firewall UFW con política de entrada denegada: solo SSH, la API de Kubernetes y las redes internas del clúster.
@@ -97,7 +98,8 @@ docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
 - [x] Ingress con Traefik e interfaz de Argo CD por HTTPS
 - [x] Bastión SSH Warpgate con configuración declarativa por API
 - [x] VPN en malla con NetBird (fase 1: plano de control en NetBird Cloud)
-- [ ] Entorno cloud y clúster de varios nodos
+- [x] Entorno cloud en AWS: VMs sin puertos de entrada, administradas por la VPN
+- [ ] Clúster de varios nodos
 - [x] CI en GitHub Actions: Terraform, Ansible, gitleaks y pre-commit en cada PR
 - [x] Gestión de secretos con SOPS + age
 - [ ] Monitorización y copias de seguridad

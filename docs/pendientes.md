@@ -33,13 +33,20 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Certificado válido en Proxmox y eliminar `PROXMOX_VE_INSECURE`.
 - [ ] DNS interno en lugar de sslip.io para los servicios con credenciales (Argo CD, Warpgate…),
       con certificados válidos emitidos por cert-manager.
+- [ ] Gestionar IAM Identity Center (usuario, conjuntos de permisos y política `TFG-Terraform`)
+      con Terraform; hoy se crearon en la consola.
+- [ ] Desactivar y borrar las claves de acceso permanentes del usuario IAM `admin-ngtn`.
+- [ ] Sacar la setup key de NetBird del `user_data` de las VMs cloud (por ejemplo, leerla de
+      SSM Parameter Store con un rol IAM de la instancia).
 
 ## Red
 
 - [ ] VPN fase 2: plano de control de NetBird autoalojado en una VM de AWS.
 - [ ] Añadir Proxmox y el móvil (app de NetBird + Termux) a la malla, con políticas propias.
-- [ ] Gestionar por la API el ajuste *Lazy connections* y borrar equipos antiguos tras `make rebuild`.
+- [ ] Gestionar por la API el ajuste *Lazy connections* y borrar equipos antiguos tras `make rebuild` y al recrear VMs cloud.
 - [ ] Rotar la setup key y el token de la API de NetBird (caducan a los 60 días).
+- [ ] Rotar la setup key de cloud (`cloud-vms`, caduca a los 30 días).
+- [ ] Mover los grupos y políticas de NetBird de `inventories/onprem` a un sitio común a todos los entornos.
 
 ## Kubernetes
 
@@ -49,6 +56,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Vigilar la política `deny (routed)` de UFW al escalar a varios nodos y al publicar aplicaciones.
 - [ ] Renombrar los contextos del kubeconfig (`tfg-onprem`, `tfg-cloud`) cuando exista el clúster cloud.
 - [ ] Vigilar la RAM del nodo Proxmox (~800 MB de margen) hasta ampliarlo a 32 GB.
+- [ ] Añadir `k3s-01.netbird.cloud` a `--tls-san` de k3s para usar `kubectl` por la VPN fuera de casa.
 
 ## Automatización y comodidad
 
@@ -57,6 +65,10 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Warpgate por API: opción para eliminar los objetos que no estén en `group_vars/core.yml`
       (hoy solo crea lo que falta) y comprobar si admite `scp`/`sftp`.
 - [ ] Actualizar `age` a 1.3.2 en el equipo de administración.
+- [ ] Objetivos del Makefile para el entorno cloud (crear, configurar y destruir) que pasen la
+      setup key desde SOPS.
+- [ ] Versión y huella de NetBird en un solo sitio (hoy, en variables de Terraform y en el rol).
+- [ ] Rol `k3s`: la descarga del instalador sale `changed` en `--check`.
 
 ## Documentación
 
@@ -96,3 +108,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Reconstrucción 5: plataforma completa sin pasos manuales en 6 min 33 s. (2026-10-09)
 - [x] ADR-0005 y VPN en malla con NetBird (fase 1): cliente en las VMs, equipo de administración y
       políticas por API sin la política Default. (2026-10-10)
+- [x] Credenciales de AWS temporales con IAM Identity Center y mínimo privilegio (ADR-0006). (2026-10-11)
+- [x] Entorno cloud en AWS: red, VM `cloud-01` sin puertos de entrada y alta en NetBird con cloud-init (ADR-0007). (2026-10-11)
+- [x] Inventario cloud generado con `tf-to-inventory.sh` y política de NetBird `admin-a-cloud`. (2026-10-11)
+- [x] Rol `common`: agente QEMU solo en VMs de Proxmox. (2026-10-11)

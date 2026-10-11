@@ -85,6 +85,12 @@ Servicios de la capa *core* (fuera del clúster):
 - **NetBird** (implementado, fase 1): VPN en malla (WireGuard) con el plano de control en NetBird
   Cloud; cliente en todas las VMs y grupos y políticas por API. Ver [acceso-vpn](runbooks/acceso-vpn.md)
   y [0005-vpn-netbird](adr/0005-vpn-netbird.md).
+- **Entorno cloud en AWS** (implementado, `eu-south-2`): red propia (VPC y subred pública) y VMs
+  efímeras sin puertos de entrada que se unen a NetBird en el primer arranque (cloud-init) y se
+  configuran con el mismo `site.yml` por la VPN. Se administran por SSH a través de NetBird, no de
+  Warpgate. Ver [vm-cloud](runbooks/vm-cloud.md),
+  [0006-aws-credenciales-sso](adr/0006-aws-credenciales-sso.md) y
+  [0007-vm-cloud-sin-puertos-entrada](adr/0007-vm-cloud-sin-puertos-entrada.md).
 - **Warpgate** (implementado en `core-01`): bastión SSH con control de acceso por roles, doble factor
   (clave pública + TOTP) y grabación de sesiones. Es el único acceso SSH humano a las VMs; usuarios, roles, destinos y huellas se
   declaran en [group_vars/core.yml](../ansible/inventories/onprem/group_vars/core.yml) y se aplican
