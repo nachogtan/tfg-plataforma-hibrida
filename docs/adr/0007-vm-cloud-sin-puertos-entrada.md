@@ -42,7 +42,7 @@ limitarlo a una IP de origen obliga a cambiar la regla cada vez.
   variables por entorno (`common_qemu_guest_agent: false`, setup key de cloud).
 - Imagen oficial de **Debian 13 arm64** (propietario `136693071363`) fijada por **nombre exacto**,
   instancia `t4g.micro`, IMDSv2 obligatorio y disco gp3 cifrado.
-- Las VMs cloud son **efímeras**: se crean cuando hacen falta y se destruyen después; la red se mantiene.
+- **Todo el entorno cloud es efímero** (VMs y red): se crea y se destruye entero con `make deploy ENV=cloud` y `make destroy ENV=cloud` (actualizado el 2026-10-12; antes se mantenía la red).
 
 ## Consecuencias
 

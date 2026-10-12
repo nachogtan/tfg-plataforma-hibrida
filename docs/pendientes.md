@@ -44,6 +44,8 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] VPN fase 2: plano de control de NetBird autoalojado en una VM de AWS.
 - [ ] Añadir Proxmox y el móvil (app de NetBird + Termux) a la malla, con políticas propias.
 - [ ] Gestionar por la API el ajuste *Lazy connections* y borrar equipos antiguos tras `make rebuild` y al recrear VMs cloud.
+- [ ] Posible mejora: borrar por la API los peers del grupo `cloud` tras `make destroy ENV=cloud`
+      (hoy se borran a mano en el panel).
 - [ ] Rotar la setup key y el token de la API de NetBird (caducan a los 60 días).
 - [ ] Rotar la setup key de cloud (`cloud-vms`, caduca a los 30 días).
 - [ ] Mover los grupos y políticas de NetBird de `inventories/onprem` a un sitio común a todos los entornos.
@@ -65,8 +67,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Warpgate por API: opción para eliminar los objetos que no estén en `group_vars/core.yml`
       (hoy solo crea lo que falta) y comprobar si admite `scp`/`sftp`.
 - [ ] Actualizar `age` a 1.3.2 en el equipo de administración.
-- [ ] Objetivos del Makefile para el entorno cloud (crear, configurar y destruir) que pasen la
-      setup key desde SOPS.
 - [ ] Versión y huella de NetBird en un solo sitio (hoy, en variables de Terraform y en el rol).
 - [ ] Rol `k3s`: la descarga del instalador sale `changed` en `--check`.
 
@@ -112,3 +112,4 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Entorno cloud en AWS: red, VM `cloud-01` sin puertos de entrada y alta en NetBird con cloud-init (ADR-0007). (2026-10-11)
 - [x] Inventario cloud generado con `tf-to-inventory.sh` y política de NetBird `admin-a-cloud`. (2026-10-11)
 - [x] Rol `common`: agente QEMU solo en VMs de Proxmox. (2026-10-11)
+- [x] Makefile con `ENV=cloud`: crear, comprobar y destruir el entorno cloud completo; `ping` espera a que las VMs respondan. (2026-10-12)

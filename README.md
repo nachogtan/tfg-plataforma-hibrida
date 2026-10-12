@@ -52,10 +52,12 @@ make help      # lista de comandos disponibles
 make deploy    # Terraform + inventario + Ansible: de cero a clúster k3s
 make status    # estado del clúster
 make check     # comprueba que no hay cambios pendientes (idempotencia)
-make rebuild   # destruye y vuelve a crear toda la plataforma
+make rebuild   # destruye y vuelve a crear el entorno on-prem (por defecto)
+make deploy ENV=cloud    # entorno cloud en AWS: red y VMs sin puertos de entrada, por la VPN
+make destroy ENV=cloud   # destruye todo el entorno cloud
 ```
 
-Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md).
+Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md) · entorno cloud: [vm-cloud](docs/runbooks/vm-cloud.md).
 
 ## Seguridad
 
