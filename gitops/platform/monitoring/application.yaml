@@ -1,0 +1,62 @@
+# Grafana Alloy: agente único que recoge métricas de las VMs (node_exporter) y las envía a
+# Grafana Cloud (ADR-0008). El token lo crea scripts/bootstrap.sh en el Secret grafana-cloud.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: alloy
+    targetRevision: 1.13.1   # Alloy v1.20.1
+    helm:
+      valuesObject:
+        controller:
+          type: deployment
+          replicas: 1
+        crds:
+          create: false
+        alloy:
+          enableReporting: false
+          resources:
+            requests: { cpu: 50m, memory: 96Mi }
+            limits: { cpu: 300m, memory: 256Mi }
+          extraEnv:
+            - name: GRAFANA_CLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-cloud
+                  key: token
+          configMap:
+            content: |
+              // Métricas de las VMs (node_exporter). Solo los nodos k3s pueden leerlas (UFW).
+              // Las IPs siguen el plan de terraform/envs/onprem/terraform.tfvars.
+              prometheus.scrape "nodes" {
+                job_name        = "node"
+                scrape_interval = "60s"
+                targets = [
+                  {"__address__" = "192.168.1.101:9100", "instance" = "k3s-01"},
+                  {"__address__" = "192.168.1.110:9100", "instance" = "core-01"},
+                ]
+                forward_to = [prometheus.remote_write.grafana_cloud.receiver]
+              }
+
+              // Envío a Grafana Cloud. El usuario y la URL no son secretos; el token sí (Secret).
+              prometheus.remote_write "grafana_cloud" {
+                endpoint {
+                  url = "https://prometheus-prod-58-prod-eu-central-0.grafana.net/api/prom/push"
+                  basic_auth {
+                    username = "3658721"
+                    password = sys.env("GRAFANA_CLOUD_TOKEN")
+                  }
+                }
+              }
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
