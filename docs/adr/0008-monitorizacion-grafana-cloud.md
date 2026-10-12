@@ -29,7 +29,7 @@ La plataforma necesita métricas de las VMs y del clúster, paneles y alertas. L
 ## Decisión
 
 - **Grafana Cloud**, plan gratuito, stack en Suiza (`prod-eu-central-0`, AWS `eu-central-2`).
-- **`node_exporter`** en todas las VMs, instalado con Ansible (versión fijada y verificada); su
+- **`node_exporter`** en todas las VMs: paquete de Debian (`prometheus-node-exporter`) instalado con Ansible, con parches de seguridad automáticos (`unattended-upgrades`); su
   puerto solo es accesible desde el clúster.
 - **Un único Grafana Alloy** en `k3s-01`, desplegado con Argo CD: recoge las métricas de los
   `node_exporter` y del clúster y las envía con *remote write* a Grafana Cloud. Solo se envían las
