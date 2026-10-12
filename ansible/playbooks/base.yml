@@ -5,3 +5,4 @@
   roles:
     - common
     - hardening
+    - node_exporter

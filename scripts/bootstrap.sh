@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Arranque de GitOps: instala Argo CD (solo la primera vez), fija la contraseña de admin
+# Arranque de GitOps: instala Argo CD (solo la primera vez), fija la contraseña de admin y el token de Grafana Cloud
 # desde SOPS y aplica la aplicación raíz.
 # Después, Argo CD se gestiona a sí mismo desde Git y despliega todo lo demás.
 set -euo pipefail
@@ -10,6 +10,7 @@ SECRETS="$ROOT/secrets/argocd.sops.yaml"
 
 # Se descifra al principio: si falta la clave age, el script falla antes de tocar el clúster
 DESIRED_HASH="$(sops decrypt --extract '["argocd_admin_password_bcrypt"]' "$SECRETS")"
+GRAFANA_TOKEN="$(sops decrypt --extract '["grafana_cloud_metrics_token"]' "$ROOT/secrets/grafana-cloud.sops.yaml")"
 
 if kubectl -n argocd get deployment argocd-server >/dev/null 2>&1; then
   echo "==> Argo CD ya está instalado: lo gestiona él mismo desde Git (no se reinstala)"
@@ -35,6 +36,14 @@ else
   echo "    Sin cambios"
 fi
 kubectl -n argocd delete secret argocd-initial-admin-secret --ignore-not-found
+
+echo "==> Token de Grafana Cloud para Alloy (secrets/grafana-cloud.sops.yaml)"
+kubectl create namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+# El token entra por stdin para que no aparezca en la lista de procesos
+printf '%s' "$GRAFANA_TOKEN" \
+  | kubectl -n monitoring create secret generic grafana-cloud --from-file=token=/dev/stdin \
+      --dry-run=client -o yaml \
+  | kubectl apply -f -
 
 echo "==> Aplicando la aplicación raíz"
 kubectl apply -f "$ROOT/gitops/bootstrap/root-app.yaml"

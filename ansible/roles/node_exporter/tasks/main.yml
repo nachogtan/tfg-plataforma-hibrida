@@ -1,0 +1,23 @@
+---
+# node_exporter desde el paquete de Debian: parches de seguridad con unattended-upgrades (ADR-0008)
+- name: Instalar node_exporter (paquete de Debian, sin paquetes recomendados)
+  ansible.builtin.apt:
+    name: prometheus-node-exporter
+    state: present
+    install_recommends: false
+
+- name: Activar y arrancar node_exporter
+  ansible.builtin.systemd_service:
+    name: prometheus-node-exporter
+    enabled: true
+    state: started
+
+- name: Permitir el puerto de node_exporter solo desde los nodos k3s
+  community.general.ufw:
+    rule: allow
+    port: "{{ node_exporter_port | string }}"
+    proto: tcp
+    from_ip: "{{ item }}"
+    comment: "node_exporter: métricas para Grafana Alloy"
+  loop: "{{ node_exporter_scrapers }}"
+  when: hardening_firewall_enabled | default(true)

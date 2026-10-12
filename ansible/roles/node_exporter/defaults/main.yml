@@ -1,0 +1,7 @@
+---
+# Puerto en el que node_exporter publica las métricas (/metrics)
+node_exporter_port: 9100
+
+# Únicos orígenes autorizados a leer las métricas: los nodos k3s (donde corre Grafana Alloy).
+# En un inventario sin grupo k3s (p. ej. cloud) la lista queda vacía y el puerto sigue cerrado.
+node_exporter_scrapers: "{{ groups['k3s'] | default([]) | map('extract', hostvars, 'ansible_host') | list }}"
