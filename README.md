@@ -4,8 +4,8 @@ Trabajo Final de Grado · CFGS Administración de Sistemas Informáticos en Red 
 **Autor:** Ignacio Gaitán · 2026
 
 Plataforma de infraestructura definida como código que se crea, configura y mantiene de forma
-automática a partir de este repositorio. Funciona sobre Proxmox VE (on-premise) y está diseñada
-para extenderse a la nube con el mismo código.
+automática a partir de este repositorio. Funciona sobre Proxmox VE (on-premise) y AWS (cloud) con el
+mismo código, unidos por una VPN en malla, con monitorización y copias de seguridad verificadas.
 
 ## Arquitectura
 
@@ -13,34 +13,41 @@ para extenderse a la nube con el mismo código.
 flowchart LR
     A[Repositorio Git] --> B[Terraform]
     B -->|VMs, imagen y cloud-init| C[Proxmox VE]
+    B -->|red y VMs efímeras| AWS[AWS]
     B -->|outputs| D[tf-to-inventory.sh]
     D -->|inventario| E[Ansible]
     S[(SOPS + age)] -.->|secretos| E
-    E -->|base, hardening, firewall| F[VMs Debian 13]
+    E -->|base, hardening, firewall, NetBird| F[VMs Debian 13]
     E -->|instala| G[Clúster k3s]
     E -->|instala y configura por API| W[Warpgate en core-01]
     A -->|GitOps| H[Argo CD]
-    H -->|Traefik y aplicaciones| G
+    H -->|Traefik, Alloy y aplicaciones| G
     W -.->|SSH con roles y grabación| F
+    G -->|métricas| GC[Grafana Cloud]
+    C -->|copias cifradas| PBS[Proxmox Backup Server]
 ```
 
 | Capa | Herramienta | Función |
 |---|---|---|
 | Provisión | Terraform (`bpg/proxmox`, `hashicorp/aws`) | Imagen Debian 13, snippet de cloud-init y VMs en Proxmox; red y VMs en AWS |
-| Configuración | Ansible | Paquetes base, hardening SSH, firewall UFW, clúster k3s y bastión Warpgate |
+| Configuración | Ansible | Paquetes base, hardening SSH, firewall UFW, NetBird, clúster k3s y bastión Warpgate |
 | Orquestación | k3s `v1.36.5+k3s1` | Kubernetes ligero, sin Traefik integrado |
-| GitOps | Argo CD v3.5.3 | App of Apps: Traefik, aplicaciones e Ingress desde Git |
+| GitOps | Argo CD v3.5.3 | App of Apps: Traefik, Alloy, aplicaciones e Ingress desde Git |
 | Acceso | Warpgate v0.29.2 | Bastión SSH con roles y grabación de sesiones, configurado por API |
-| Red | NetBird 0.80.0 | VPN en malla (WireGuard); grupos y políticas por API |
+| Red | NetBird 0.80.0 | VPN en malla (WireGuard) entre on-prem, cloud y el equipo de administración |
+| Observabilidad | Grafana Alloy v1.20.1, `node_exporter`, Grafana Cloud | Métricas de las VMs, panel y alertas por Telegram |
+| Copias | Proxmox Backup Server 4.2 | Copias diarias cifradas de las VMs, con restauración probada |
 | Secretos | SOPS + age | Secretos cifrados en el repositorio |
 | Calidad | pre-commit, GitHub Actions | Formato, validación y detección de secretos |
 
 ## Requisitos
 
 - Proxmox VE 9.x con un usuario y token de API para Terraform.
-- Equipo de administración con `terraform`, `ansible`, `jq`, `kubectl`, `make`, `pre-commit`, `sops` y `age`.
+- Equipo de administración con `terraform`, `ansible`, `jq`, `kubectl`, `make`, `pre-commit`, `sops`,
+  `age`, AWS CLI v2 y el cliente de NetBird.
 - Clave privada `age` en `~/.config/sops/age/keys.txt` para descifrar los secretos de `secrets/`.
 - Archivo `.env` con las credenciales de Proxmox (ver `.env.example`).
+- Entorno cloud: acceso SSO de AWS con el perfil `tfg` ([ADR-0006](docs/adr/0006-aws-credenciales-sso.md)).
 
 Guía completa: [Configuración inicial](docs/runbooks/configuracion-inicial.md).
 
@@ -49,7 +56,7 @@ Guía completa: [Configuración inicial](docs/runbooks/configuracion-inicial.md)
 ```bash
 ssh-add ~/.ssh/id_ed25519
 make help      # lista de comandos disponibles
-make deploy    # Terraform + inventario + Ansible: de cero a clúster k3s
+make deploy    # Terraform + inventario + Ansible + GitOps: de cero a clúster k3s
 make status    # estado del clúster
 make check     # comprueba que no hay cambios pendientes (idempotencia)
 make rebuild   # destruye y vuelve a crear el entorno on-prem (por defecto)
@@ -57,21 +64,27 @@ make deploy ENV=cloud    # entorno cloud en AWS: red y VMs sin puertos de entrad
 make destroy ENV=cloud   # destruye todo el entorno cloud
 ```
 
-Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md) · entorno cloud: [vm-cloud](docs/runbooks/vm-cloud.md) · monitorización: [monitorizacion](docs/runbooks/monitorizacion.md).
+Procedimientos: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md) ·
+[entorno cloud](docs/runbooks/vm-cloud.md) · [monitorización](docs/runbooks/monitorizacion.md) ·
+[copias de seguridad](docs/runbooks/backups.md) · [restauración](docs/runbooks/restauracion.md).
 
 ## Seguridad
 
 - Credenciales fuera del repositorio (`.env`, kubeconfig en `~/.kube/`) y detección de secretos con pre-commit.
 - CI sin credenciales en cada PR (gitleaks sobre todo el historial y hooks de pre-commit), obligatoria para fusionar en `main`.
-- Token de API de Proxmox con permisos mínimos; permisos de borrado limitados al almacenamiento de imágenes.
+- Secretos versionados cifrados con SOPS + age; la clave privada nunca entra en el repositorio.
+- Mínimo privilegio en todas las credenciales: token de Proxmox para Terraform, perfil de AWS
+  limitado (SSO, credenciales temporales), token de Grafana Cloud de solo escritura de métricas y
+  token de PBS que no puede borrar copias.
 - SSH solo con clave pública, sin acceso de `root` ni contraseñas.
 - VPN en malla NetBird sin puertos abiertos en el router; política de denegación por defecto.
-- VMs cloud sin puertos de entrada; credenciales de AWS temporales (SSO) y de mínimo privilegio.
-- Acceso SSH humano centralizado en el bastión Warpgate: roles, clave pública + TOTP y sesiones grabadas.
-- Secretos versionados cifrados con SOPS + age; la clave privada nunca entra en el repositorio.
-- Firewall UFW con política de entrada denegada: solo SSH, la API de Kubernetes y las redes internas del clúster.
+- VMs cloud sin puertos de entrada; se administran solo a través de la VPN.
+- Acceso SSH humano a las VMs on-prem centralizado en el bastión Warpgate: roles, clave pública + TOTP y sesiones grabadas.
+- Firewall UFW con política de entrada denegada: solo los puertos que necesita cada rol (y las
+  métricas, solo para el clúster).
+- Copias de seguridad cifradas en el origen, en un equipo aparte.
 
-## Pruebas de reproducibilidad
+## Pruebas de reproducibilidad y recuperación
 
 | Prueba | Alcance | Resultado | Tiempo |
 |---|---|---|---|
@@ -80,6 +93,8 @@ Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md) �
 | [Reconstrucción 3](docs/pruebas/2026-10-05-reconstruccion-3.md) | + firewall + k3s + kubectl | ✅ Superada | 8 min 35 s |
 | [Reconstrucción 4](docs/pruebas/2026-10-07-reconstruccion-4.md) | + Argo CD + Traefik + Ingress (`make rebuild`) | ✅ Superada | 5 min 25 s |
 | [Reconstrucción 5](docs/pruebas/2026-10-09-reconstruccion-5.md) | + Warpgate + SOPS + TOTP, sin pasos manuales | ✅ Superada | 6 min 33 s |
+| [Entorno cloud](docs/runbooks/vm-cloud.md) | `make deploy` / `check` / `destroy` con `ENV=cloud` | ✅ Superada | — |
+| [Restauración desde PBS](docs/runbooks/backups.md) | `core-01` desde copia cifrada, con sus datos | ✅ Superada | 1 min 19 s |
 
 ## Estructura del repositorio
 
@@ -88,7 +103,9 @@ terraform/   Provisión: módulos (imagen, VM) y entornos (onprem, cloud)
 ansible/     Configuración: inventarios, playbooks y roles
 gitops/      Manifiestos que despliega Argo CD (App of Apps)
 scripts/     Utilidades (generación del inventario, bootstrap)
+secrets/     Secretos cifrados con SOPS
 docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
+Makefile     Atajos para desplegar, comprobar y destruir cada entorno
 ```
 
 ## Estado
@@ -101,11 +118,11 @@ docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
 - [x] Bastión SSH Warpgate con configuración declarativa por API
 - [x] VPN en malla con NetBird (fase 1: plano de control en NetBird Cloud)
 - [x] Entorno cloud en AWS: VMs sin puertos de entrada, administradas por la VPN
-- [ ] Clúster de varios nodos
 - [x] CI en GitHub Actions: Terraform, Ansible, gitleaks y pre-commit en cada PR
 - [x] Gestión de secretos con SOPS + age
 - [x] Monitorización con Grafana Cloud (Alloy + node_exporter) y alertas por Telegram
-- [ ] Copias de seguridad
+- [x] Copias de seguridad cifradas con Proxmox Backup Server y restauración probada
+- [ ] Clúster de varios nodos
 
 Pendientes y mejoras: [docs/pendientes.md](docs/pendientes.md).
 
@@ -114,4 +131,5 @@ Pendientes y mejoras: [docs/pendientes.md](docs/pendientes.md).
 - [Arquitectura](docs/arquitectura.md)
 - [Decisiones de diseño (ADR)](docs/adr/)
 - [Runbooks](docs/runbooks/)
+- [Pruebas](docs/pruebas/)
 - [Diario del proyecto](docs/diario/)

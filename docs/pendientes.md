@@ -60,7 +60,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Puertos para clúster de varios nodos: `10250/tcp`, `8472/udp` (Flannel) y `2379-2380/tcp` (etcd).
 - [ ] Vigilar la política `deny (routed)` de UFW al escalar a varios nodos y al publicar aplicaciones.
 - [ ] Renombrar los contextos del kubeconfig (`tfg-onprem`, `tfg-cloud`) cuando exista el clúster cloud.
-- [ ] Vigilar la RAM del nodo Proxmox (~800 MB de margen) hasta ampliarlo a 32 GB.
+- [ ] Vigilar la RAM del nodo Proxmox (~1,2 GiB disponibles, medido el 2026-10-13) hasta ampliarlo a 32 GB.
 - [ ] Añadir `k3s-01.netbird.cloud` a `--tls-san` de k3s para usar `kubectl` por la VPN fuera de casa.
 - [ ] Métricas de Kubernetes (cAdvisor y kubelet) en Alloy, filtradas para no superar el plan Free.
 
@@ -75,6 +75,17 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Rol `k3s`: la descarga del instalador sale `changed` en `--check`.
 - [ ] Panel y alerta de Grafana Cloud como código (provider de Terraform de Grafana); hoy se crean a mano.
 - [ ] `make check` con progreso visible (hoy `| tail` no muestra nada hasta el final).
+
+## Copias de seguridad
+
+- [ ] Backend remoto del estado de Terraform (por ejemplo, S3 con versionado y bloqueo): hoy es local
+      y no tiene copia.
+- [ ] Copia fuera de casa (regla 3-2-1): sincronizar el datastore de PBS con otro destino externo.
+- [ ] Configuración de PBS y del almacenamiento `pbs-01` en Proxmox VE como código (Ansible o el
+      recurso del provider `bpg/proxmox`); hoy es manual y está documentada.
+- [ ] Alerta de "sin copias recientes" (notificaciones de PBS o métrica en Grafana Cloud).
+- [ ] Acceso a PBS con clave SSH y sin contraseña de root; certificado válido para su web.
+- [ ] Revisar por qué Warpgate queda en `activating` en una VM restaurada sin red.
 
 ## Documentación
 
@@ -121,3 +132,8 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Makefile con `ENV=cloud`: crear, comprobar y destruir el entorno cloud completo; `ping` espera a que las VMs respondan. (2026-10-12)
 - [x] Monitorización: `node_exporter` en las VMs, Grafana Alloy en el clúster y métricas en Grafana Cloud (ADR-0008). (2026-10-12)
 - [x] Panel *Node Exporter Full* y alerta "VM sin métricas" por Telegram, probada con caída y recuperación. (2026-10-13)
+- [x] Proxmox Backup Server en `pbs-01` con token de mínimo privilegio, copias diarias cifradas,
+      retención, limpieza y verificación (ADR-0009). (2026-10-13)
+- [x] Prueba de restauración: `core-01` desde PBS en 1 min 19 s, con los datos de Warpgate. (2026-10-13)
+- [x] Velero descartado y Loki replanteado como logs hacia Grafana Cloud. (2026-10-13)
+- [x] Revisión de la documentación: arquitectura, README, mapa y runbook de restauración. (2026-10-13)
