@@ -57,7 +57,7 @@ make deploy ENV=cloud    # entorno cloud en AWS: red y VMs sin puertos de entrad
 make destroy ENV=cloud   # destruye todo el entorno cloud
 ```
 
-Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md) · entorno cloud: [vm-cloud](docs/runbooks/vm-cloud.md).
+Procedimiento detallado: [Puesta en marcha](docs/runbooks/puesta-en-marcha.md) · entorno cloud: [vm-cloud](docs/runbooks/vm-cloud.md) · monitorización: [monitorizacion](docs/runbooks/monitorizacion.md).
 
 ## Seguridad
 
@@ -104,7 +104,8 @@ docs/        Arquitectura, decisiones (ADR), runbooks, pruebas y diario
 - [ ] Clúster de varios nodos
 - [x] CI en GitHub Actions: Terraform, Ansible, gitleaks y pre-commit en cada PR
 - [x] Gestión de secretos con SOPS + age
-- [ ] Monitorización y copias de seguridad
+- [x] Monitorización con Grafana Cloud (Alloy + node_exporter) y alertas por Telegram
+- [ ] Copias de seguridad
 
 Pendientes y mejoras: [docs/pendientes.md](docs/pendientes.md).
 

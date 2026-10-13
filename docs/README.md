@@ -12,7 +12,7 @@ operativos, las pruebas y el diario de trabajo.
 > [!NOTE]
 > **Estado (2026-10-10):** entorno on-premise operativo y reproducible: VMs con Terraform, configuración
 > y hardening con Ansible, clúster k3s, GitOps con Argo CD, bastión Warpgate, secretos con SOPS
-> y VPN en malla con NetBird. Pendiente: entorno cloud, monitorización y copias de seguridad ([pendientes](pendientes.md)).
+> y VPN en malla con NetBird. Pendiente: copias de seguridad ([pendientes](pendientes.md)).
 
 ## Visión general
 
@@ -41,6 +41,7 @@ operativos, las pruebas y el diario de trabajo.
 - [0005-vpn-netbird](adr/0005-vpn-netbird.md): VPN en malla con NetBird (plano de control en SaaS en la fase 1).
 - [0006-aws-credenciales-sso](adr/0006-aws-credenciales-sso.md): AWS con credenciales temporales (IAM Identity Center) y mínimo privilegio.
 - [0007-vm-cloud-sin-puertos-entrada](adr/0007-vm-cloud-sin-puertos-entrada.md): VMs cloud sin puertos de entrada, administradas por NetBird.
+- [0008-monitorizacion-grafana-cloud](adr/0008-monitorizacion-grafana-cloud.md): monitorización con Grafana Cloud y un único agente (Alloy) en el clúster.
 
 ## Runbooks
 
@@ -49,6 +50,7 @@ operativos, las pruebas y el diario de trabajo.
 - [acceso-warpgate](runbooks/acceso-warpgate.md): acceso SSH a las VMs a través del bastión.
 - [acceso-vpn](runbooks/acceso-vpn.md): VPN en malla con NetBird (equipos, políticas y rotación).
 - [vm-cloud](runbooks/vm-cloud.md): VMs en AWS (crear, configurar por la VPN, recrear y destruir).
+- [monitorizacion](runbooks/monitorizacion.md): métricas en Grafana Cloud, alerta por Telegram y rotación del token.
 - [añadir-nodo](runbooks/añadir-nodo.md): ampliar el clúster k3s con un nodo nuevo.
 - [restauracion](runbooks/restauracion.md): recuperación ante desastres.
 

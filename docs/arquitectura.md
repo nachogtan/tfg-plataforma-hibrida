@@ -75,7 +75,7 @@ Decisiones: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separ
 | Playbook | Alcance previsto | Roles |
 |---|---|---|
 | [site.yml](../ansible/playbooks/site.yml) | Orquesta los demás playbooks | — |
-| [base.yml](../ansible/playbooks/base.yml) | Todos los hosts | `common`, `hardening` (previsto: `node_exporter`) |
+| [base.yml](../ansible/playbooks/base.yml) | Todos los hosts | `common`, `hardening`, `node_exporter` |
 | [core.yml](../ansible/playbooks/core.yml) | Grupo `core` ([group_vars](../ansible/inventories/onprem/group_vars/core.yml)) | `warpgate` (previstos: `docker`, `authentik`) |
 | [netbird.yml](../ansible/playbooks/netbird.yml) | Todos los hosts + `localhost` (API) | `netbird` |
 | [k3s.yml](../ansible/playbooks/k3s.yml) | Grupo `k3s` ([group_vars](../ansible/inventories/onprem/group_vars/k3s.yml)) | `k3s` |
@@ -96,7 +96,7 @@ Servicios de la capa *core* (fuera del clúster):
   declaran en [group_vars/core.yml](../ansible/inventories/onprem/group_vars/core.yml) y se aplican
   con su API. Ver [acceso-warpgate](runbooks/acceso-warpgate.md).
 - **Authentik** *(previsto)*: proveedor de identidad (SSO) para los servicios de la plataforma.
-- **node_exporter** *(previsto)*: métricas de host consumidas por `monitoring` en el clúster.
+- **node_exporter** (implementado): métricas de cada VM, leídas solo desde los nodos k3s por Grafana Alloy y enviadas a Grafana Cloud. Ver [monitorizacion](runbooks/monitorizacion.md) y [0008-monitorizacion-grafana-cloud](adr/0008-monitorizacion-grafana-cloud.md).
 
 Configuración común: [ansible.cfg](../ansible/ansible.cfg), colecciones en [requirements.yml](../ansible/requirements.yml).
 
@@ -111,7 +111,7 @@ Decisión: [0003-gitops-argocd](adr/0003-gitops-argocd.md)
 | demo-app | [apps/demo-app/](../gitops/apps/demo-app/deployment.yaml) | Traefik (Ingress) |
 | Traefik | `gitops/platform/traefik/` | k3s (Traefik integrado desactivado, ver [0001-eleccion-k3s](adr/0001-eleccion-k3s.md)) |
 | cert-manager *(previsto)* | `gitops/platform/cert-manager/` | Traefik (TLS de los Ingress) |
-| Monitoring *(previsto)* | `gitops/platform/monitoring/` | Rol `node_exporter` en los hosts |
+| Monitoring (Grafana Alloy → Grafana Cloud) | `gitops/platform/monitoring/` | Rol `node_exporter`; Secret `grafana-cloud` (bootstrap) |
 | Loki *(previsto)* | `gitops/platform/loki/` | Monitoring (Grafana) |
 | Velero *(previsto)* | `gitops/platform/velero/` | Almacenamiento de copias, ver [restauracion](runbooks/restauracion.md) |
 | demo-app | `gitops/apps/demo-app/` | Plataforma desplegada |
