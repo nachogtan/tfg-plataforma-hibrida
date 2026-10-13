@@ -38,6 +38,8 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Desactivar y borrar las claves de acceso permanentes del usuario IAM `admin-ngtn`.
 - [ ] Sacar la setup key de NetBird del `user_data` de las VMs cloud (por ejemplo, leerla de
       SSM Parameter Store con un rol IAM de la instancia).
+- [ ] Rotar el token de Grafana Cloud (caduca a los 90 días; ver [monitorizacion](runbooks/monitorizacion.md)).
+- [ ] Descifrar los secretos dentro del clúster (KSOPS o Sealed Secrets) en lugar de crearlos en `bootstrap.sh`.
 
 ## Red
 
@@ -49,6 +51,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Rotar la setup key y el token de la API de NetBird (caducan a los 60 días).
 - [ ] Rotar la setup key de cloud (`cloud-vms`, caduca a los 30 días).
 - [ ] Mover los grupos y políticas de NetBird de `inventories/onprem` a un sitio común a todos los entornos.
+- [ ] Monitorizar las VMs cloud: política de NetBird del clúster al grupo `cloud` y destinos en Alloy.
 
 ## Kubernetes
 
@@ -59,6 +62,7 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Renombrar los contextos del kubeconfig (`tfg-onprem`, `tfg-cloud`) cuando exista el clúster cloud.
 - [ ] Vigilar la RAM del nodo Proxmox (~800 MB de margen) hasta ampliarlo a 32 GB.
 - [ ] Añadir `k3s-01.netbird.cloud` a `--tls-san` de k3s para usar `kubectl` por la VPN fuera de casa.
+- [ ] Métricas de Kubernetes (cAdvisor y kubelet) en Alloy, filtradas para no superar el plan Free.
 
 ## Automatización y comodidad
 
@@ -69,6 +73,8 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Actualizar `age` a 1.3.2 en el equipo de administración.
 - [ ] Versión y huella de NetBird en un solo sitio (hoy, en variables de Terraform y en el rol).
 - [ ] Rol `k3s`: la descarga del instalador sale `changed` en `--check`.
+- [ ] Panel y alerta de Grafana Cloud como código (provider de Terraform de Grafana); hoy se crean a mano.
+- [ ] `make check` con progreso visible (hoy `| tail` no muestra nada hasta el final).
 
 ## Documentación
 
@@ -113,3 +119,5 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Inventario cloud generado con `tf-to-inventory.sh` y política de NetBird `admin-a-cloud`. (2026-10-11)
 - [x] Rol `common`: agente QEMU solo en VMs de Proxmox. (2026-10-11)
 - [x] Makefile con `ENV=cloud`: crear, comprobar y destruir el entorno cloud completo; `ping` espera a que las VMs respondan. (2026-10-12)
+- [x] Monitorización: `node_exporter` en las VMs, Grafana Alloy en el clúster y métricas en Grafana Cloud (ADR-0008). (2026-10-12)
+- [x] Panel *Node Exporter Full* y alerta "VM sin métricas" por Telegram, probada con caída y recuperación. (2026-10-13)
