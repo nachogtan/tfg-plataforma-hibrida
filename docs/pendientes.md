@@ -7,16 +7,27 @@ tags: [pendientes, backlog]
 
 ↑ [Mapa del repositorio](README.md)
 
-Lista viva de tareas pendientes y mejoras identificadas durante el proyecto.
-Al completar una, se marca con `[x]` y se indica la fecha o el PR.
+Lista viva de tareas pendientes y mejoras identificadas durante el proyecto, dividida en lo que
+hay que hacer **antes de la entrega** y el **trabajo futuro**, que es la base de las líneas futuras
+de la memoria. Al completar una, se marca con `[x]` y se mueve a [Completados](#completados) con la
+fecha o el PR.
 
-## Posibles ampliaciones
+## Antes de la entrega
 
-- [ ] Agente de IA OpenClaw en un namespace aislado: NetworkPolicies (solo salida a la API del LLM),
-      RBAC mínimo, secretos con SOPS, límites de recursos y sin exposición pública.
-- [ ] Versión en inglés de la documentación (`README.md` en inglés y `README.es.md` en español).
+> [!WARNING]
+> Las setup keys y el token de NetBird caducan. Las máquinas ya unidas siguen conectadas, pero sin
+> claves válidas fallan `make deploy ENV=cloud` y `make rebuild`. Comprobar las fechas en el panel.
 
-## Seguridad
+- [ ] Renovar la setup key de cloud (`cloud-vms`, 30 días; caduca hacia el 2026-11-10): crear una
+      nueva, cifrarla con SOPS, probar `make deploy ENV=cloud` y revocar la antigua.
+- [ ] Renovar la setup key de on-prem y el token de la API de NetBird (60 días; caducan hacia el
+      2026-12-09), con el mismo procedimiento.
+- [ ] Opcional: hook de pre-commit que compruebe que los ficheros de `secrets/` están cifrados con SOPS.
+- [ ] Revisión general de formato del repositorio.
+
+## Trabajo futuro
+
+### Seguridad
 
 - [ ] Caducidad de la clave en el agente (`ssh-add -t`); opcional, clave FIDO2 `ed25519-sk`.
 - [ ] Usuario de API propio para Ansible en Warpgate (por ejemplo, `ansible-api`) con un rol de
@@ -26,7 +37,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       del equipo de administración en NetBird; después, cerrar también el 22 de `core-01` a la LAN.
 - [ ] Claves de host fijas para Warpgate (`--import-ssh-host-keys`, cifradas con SOPS) para que su
       huella no cambie al recrear `core-01`.
-- [ ] Hook de pre-commit que compruebe que los ficheros de `secrets/` están cifrados con SOPS.
 - [ ] Certificado válido para Warpgate (puerto 8888) y `warpgate_api_validate_certs: true`.
 - [ ] Usuario SSH dedicado con permisos mínimos para Terraform en Proxmox, en lugar de root.
 - [ ] Endurecer el SSH del nodo Proxmox (`PermitRootLogin prohibit-password`, sin contraseñas).
@@ -37,43 +47,33 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       con Terraform; hoy se crearon en la consola.
 - [ ] Sacar la setup key de NetBird del `user_data` de las VMs cloud (por ejemplo, leerla de
       SSM Parameter Store con un rol IAM de la instancia).
-- [ ] Rotar el token de Grafana Cloud (caduca a los 90 días; ver [monitorizacion](runbooks/monitorizacion.md)).
 - [ ] Descifrar los secretos dentro del clúster (KSOPS o Sealed Secrets) en lugar de crearlos en `bootstrap.sh`.
 
-## Red
+### Red
 
 - [ ] VPN fase 2: plano de control de NetBird autoalojado en una VM de AWS.
 - [ ] Añadir Proxmox y el móvil (app de NetBird + Termux) a la malla, con políticas propias.
-- [ ] Gestionar por la API el ajuste *Lazy connections* y borrar equipos antiguos tras `make rebuild` y al recrear VMs cloud.
-- [ ] Posible mejora: borrar por la API los peers del grupo `cloud` tras `make destroy ENV=cloud`
-      (hoy se borran a mano en el panel).
-- [ ] Rotar la setup key y el token de la API de NetBird (caducan a los 60 días).
-- [ ] Rotar la setup key de cloud (`cloud-vms`, caduca a los 30 días).
+- [ ] Gestionar por la API el ajuste *Lazy connections* y borrar los peers antiguos tras `make rebuild`
+      y tras `make destroy ENV=cloud` (hoy se hace a mano en el panel).
 - [ ] Mover los grupos y políticas de NetBird de `inventories/onprem` a un sitio común a todos los entornos.
-- [ ] Monitorizar las VMs cloud: política de NetBird del clúster al grupo `cloud` y destinos en Alloy.
 
-## Kubernetes
+### Kubernetes
 
 - [ ] Modo *agent* en el rol `k3s` para unir nodos al clúster: hoy solo instala un servidor
       (ver [añadir-nodo](runbooks/añadir-nodo.md)).
 - [ ] Puertos para clúster de varios nodos: `10250/tcp`, `8472/udp` (Flannel) y `2379-2380/tcp` (etcd).
 - [ ] Vigilar la política `deny (routed)` de UFW al escalar a varios nodos y al publicar aplicaciones.
-- [ ] Renombrar los contextos del kubeconfig (`tfg-onprem`, `tfg-cloud`) cuando exista el clúster cloud.
-- [ ] Vigilar la RAM del nodo Proxmox (~1,2 GiB disponibles, medido el 2026-10-13) hasta ampliarlo a 32 GB.
+- [ ] Vigilar la RAM del nodo Proxmox (~1,2 GiB disponibles, medido el 2026-10-13).
+
+### Observabilidad
+
+- [ ] Rotar el token de Grafana Cloud (90 días; caduca hacia el 2027-01-10; ver
+      [monitorizacion](runbooks/monitorizacion.md)).
+- [ ] Monitorizar las VMs cloud: política de NetBird del clúster al grupo `cloud` y destinos en Alloy.
 - [ ] Métricas de Kubernetes (cAdvisor y kubelet) en Alloy, filtradas para no superar el plan Free.
-
-## Automatización y comodidad
-
-- [ ] Fijar las GitHub Actions por SHA en lugar de etiqueta y activar Dependabot para actualizarlas.
-- [ ] Validar los manifiestos de `gitops/` en CI (por ejemplo, con kubeconform).
-- [ ] Warpgate por API: opción para eliminar los objetos que no estén en `group_vars/core.yml`
-      (hoy solo crea lo que falta) y comprobar si admite `scp`/`sftp`.
-- [ ] Actualizar `age` a 1.3.2 en el equipo de administración.
-- [ ] Versión y huella de NetBird en un solo sitio (hoy, en variables de Terraform y en el rol).
-- [ ] Rol `k3s`: la descarga del instalador sale `changed` en `--check`.
 - [ ] Panel y alerta de Grafana Cloud como código (provider de Terraform de Grafana); hoy se crean a mano.
 
-## Copias de seguridad
+### Copias de seguridad
 
 - [ ] Copia fuera de casa (regla 3-2-1): sincronizar el datastore de PBS con otro destino externo.
 - [ ] Configuración de PBS y del almacenamiento `pbs-01` en Proxmox VE como código (Ansible o el
@@ -82,10 +82,22 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Acceso a PBS con clave SSH y sin contraseña de root; certificado válido para su web.
 - [ ] Revisar por qué Warpgate queda en `activating` en una VM restaurada sin red.
 
-## Documentación
+### Automatización y CI
 
-- [ ] Índice de la memoria del TFG y qué material del repositorio alimenta cada capítulo (en curso).
-- [ ] Revisión general de formato del repositorio antes de la entrega.
+- [ ] Fijar las GitHub Actions por SHA en lugar de etiqueta y activar Dependabot para actualizarlas.
+- [ ] Validar los manifiestos de `gitops/` en CI (por ejemplo, con kubeconform).
+- [ ] Warpgate por API: opción para eliminar los objetos que no estén en `group_vars/core.yml`
+      (hoy solo crea lo que falta) y comprobar si admite `scp`/`sftp`.
+- [ ] Actualizar `age` a 1.3.2 en el equipo de administración.
+- [ ] Versión y huella de NetBird en un solo sitio (hoy, en variables de Terraform y en el rol).
+- [ ] Rol `k3s`: la descarga del instalador sale `changed` en `--check`.
+
+### Posibles ampliaciones
+
+- [ ] Agente de IA OpenClaw en un namespace aislado: NetworkPolicies (solo salida a la API del LLM),
+      RBAC mínimo, secretos con SOPS, límites de recursos y sin exposición pública.
+- [ ] Clúster k3s también en AWS, con contextos del kubeconfig renombrados (`tfg-onprem`, `tfg-cloud`).
+- [ ] Versión en inglés de la documentación (`README.md` en inglés y `README.es.md` en español).
 
 ## Completados
 
@@ -138,3 +150,4 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       cambian la versión o los argumentos. (2026-10-14)
 - [x] `make check` con progreso visible y que falla si Ansible detecta cambios (caché de apt sin
       contar como cambio). (2026-10-14)
+- [x] Diagramas SVG de flujo (README) y topología (arquitectura) en lugar de los mermaid. (2026-10-14, PR #58)
