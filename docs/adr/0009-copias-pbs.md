@@ -41,6 +41,10 @@ RAM libre para más servicios, pero hay un portátil disponible (i7 de 6.ª gene
 - **Configuración manual** (web de Proxmox VE y CLI de PBS), documentada en el runbook.
 - **Velero descartado:** el estado del clúster se reconstruye desde Git y las VMs se copian enteras.
 - Dos estrategias de recuperación complementarias: **reconstruir** (configuración) y **restaurar** (datos).
+- **Estado de Terraform local** (decisión consciente, fuera del alcance del TFG): perderlo no supone
+  perder datos. En cloud el entorno es efímero (destruido, el estado queda vacío) y en on-prem las
+  VMs se recrean con `make deploy` (~6 min) tras borrarlas en Proxmox; los datos están en PBS. En
+  producción se usaría un backend remoto: bucket S3 privado con versionado y bloqueo (`use_lockfile`).
 
 ## Consecuencias
 
@@ -53,7 +57,7 @@ RAM libre para más servicios, pero hay un portátil disponible (i7 de 6.ª gene
 - ⚠ Sin la clave de cifrado las copias no se pueden restaurar: hay dos copias de la clave (SOPS y
   gestor de contraseñas).
 - ⚠ La configuración de PBS y del almacenamiento en Proxmox VE no está como código.
-- ⚠ El estado de Terraform sigue sin copia (pendiente: backend remoto).
+- ⚠ El estado de Terraform es local y sin copia; su pérdida se resuelve recreando (ver [restauracion](../runbooks/restauracion.md), escenario E).
 
 ## Relacionado
 
