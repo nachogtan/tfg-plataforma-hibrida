@@ -13,7 +13,7 @@ Hay dos estrategias complementarias: **reconstruir desde el código** (recupera 
 
 > [!NOTE]
 > **Estado (2026-10-13):** probados los escenarios A, B y C. El estado de Terraform sigue siendo
-> local en el equipo de administración (backend remoto pendiente).
+> local en el equipo de administración por decisión (ver escenario E).
 
 **Decisiones de referencia:** [0002-terraform-ansible-separacion](../adr/0002-terraform-ansible-separacion.md),
 [0003-gitops-argocd](../adr/0003-gitops-argocd.md), [0004-gestion-secretos-sops](../adr/0004-gestion-secretos-sops.md),
@@ -27,7 +27,7 @@ Hay dos estrategias complementarias: **reconstruir desde el código** (recupera 
 | VMs on-prem completas (incluidos los datos de Warpgate) | Proxmox Backup Server, copia diaria cifrada | [backups](backups.md) |
 | Secretos de la plataforma | Cifrados con SOPS en `secrets/` | [0004-gestion-secretos-sops](../adr/0004-gestion-secretos-sops.md) |
 | Clave privada de age (SOPS) y clave de cifrado de PBS | Gestor de contraseñas (fuera de la plataforma) | — |
-| Estado de Terraform | Local en el equipo de administración; backend remoto *(pendiente)* | [onprem/backend.tf](../../terraform/envs/onprem/backend.tf), [cloud/backend.tf](../../terraform/envs/cloud/backend.tf) |
+| Estado de Terraform | Local en el equipo de administración, sin copia por decisión (escenario E) | [onprem/backend.tf](../../terraform/envs/onprem/backend.tf), [cloud/backend.tf](../../terraform/envs/cloud/backend.tf) |
 | Panel y alerta de Grafana Cloud | Configuración manual documentada | [monitorizacion](monitorizacion.md) |
 
 > [!CAUTION]
@@ -85,6 +85,21 @@ Para sustituir la VM original por su copia:
    ([backups](backups.md#7-recuperación-ante-desastre-nodo-proxmox-nuevo)).
 3. Restaurar las VMs desde PBS con sus IDs originales, o reconstruirlas con `make deploy` y restaurar
    solo los datos que hagan falta.
+
+## Escenario E: pérdida del estado de Terraform
+
+El estado es local por decisión ([0009-copias-pbs](../adr/0009-copias-pbs.md)). Perderlo no supone
+perder datos:
+
+- **Cloud:** si el entorno estaba destruido, no hay nada que recuperar. Si estaba creado, borrar en
+  la consola de AWS los recursos con la etiqueta `proyecto = tfg-plataforma-hibrida` (o importarlos
+  con `terraform import`) y volver a crearlos con `make deploy ENV=cloud`.
+- **On-prem:** borrar las VMs en Proxmox (`qm stop <id> && qm destroy <id> --purge`) y ejecutar
+  `make deploy` (~6 min). Si hacen falta sus datos, restaurarlos después desde PBS (escenario C).
+
+> [!TIP]
+> Antes de borrar las VMs on-prem, lanzar una copia manual en PBS (*Run now*) para no perder los
+> datos más recientes.
 
 ## Tiempos de recuperación medidos
 

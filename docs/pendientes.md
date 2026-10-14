@@ -78,8 +78,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 
 ## Copias de seguridad
 
-- [ ] Backend remoto del estado de Terraform (por ejemplo, S3 con versionado y bloqueo): hoy es local
-      y no tiene copia.
 - [ ] Copia fuera de casa (regla 3-2-1): sincronizar el datastore de PBS con otro destino externo.
 - [ ] Configuración de PBS y del almacenamiento `pbs-01` en Proxmox VE como código (Ansible o el
       recurso del provider `bpg/proxmox`); hoy es manual y está documentada.
@@ -137,3 +135,5 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Prueba de restauración: `core-01` desde PBS en 1 min 19 s, con los datos de Warpgate. (2026-10-13)
 - [x] Velero descartado y Loki replanteado como logs hacia Grafana Cloud. (2026-10-13)
 - [x] Revisión de la documentación: arquitectura, README, mapa y runbook de restauración. (2026-10-13)
+- [x] Estado de Terraform: se mantiene local por decisión documentada (ADR-0009 y escenario E de
+      `restauracion.md`); en producción iría a un bucket S3 privado con versionado y bloqueo. (2026-10-14)

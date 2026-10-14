@@ -68,7 +68,7 @@ Decisión: [0002-terraform-ansible-separacion](adr/0002-terraform-ansible-separa
 | Módulo `proxmox-image` | Plantilla base (imagen cloud-init) | [modules/proxmox-image/](../terraform/modules/proxmox-image/main.tf) |
 | Módulo `proxmox-vm` | VM reutilizable en Proxmox | [modules/proxmox-vm/](../terraform/modules/proxmox-vm/main.tf) |
 | Módulo `cloud-vm` | VM reutilizable en AWS (IMDSv2, disco cifrado) | [modules/cloud-vm/](../terraform/modules/cloud-vm/main.tf) |
-| Estado | Local en el equipo de administración; backend remoto *(previsto)* | [onprem/backend.tf](../terraform/envs/onprem/backend.tf), [cloud/backend.tf](../terraform/envs/cloud/backend.tf) |
+| Estado | Local en el equipo de administración, por decisión ([0009-copias-pbs](adr/0009-copias-pbs.md)) | [onprem/backend.tf](../terraform/envs/onprem/backend.tf), [cloud/backend.tf](../terraform/envs/cloud/backend.tf) |
 | Credenciales | On-prem: `.env` (fuera del repositorio). Cloud: SSO de AWS (perfil `tfg`) y setup key de NetBird desde SOPS por `TF_VAR_` | [0006-aws-credenciales-sso](adr/0006-aws-credenciales-sso.md) |
 
 Los `outputs.tf` de cada entorno exponen los datos de los hosts (nombre, IP o nombre en la malla,
@@ -208,7 +208,7 @@ Dos estrategias de recuperación complementarias:
 - Token de mínimo privilegio (solo `Datastore.Backup`: no puede borrar copias).
 - Retención (3 últimas + 7 diarias), limpieza diaria y verificación (cada copia, como mucho una vez al mes).
 - Lo que no se reconstruye desde Git: datos de Warpgate (base de datos y grabaciones) y estado de
-  Terraform (pendiente: backend remoto).
+  Terraform (local por decisión; ver el escenario E de [restauracion](runbooks/restauracion.md)).
 
 Ver [backups](runbooks/backups.md).
 
