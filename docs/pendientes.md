@@ -73,7 +73,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Versión y huella de NetBird en un solo sitio (hoy, en variables de Terraform y en el rol).
 - [ ] Rol `k3s`: la descarga del instalador sale `changed` en `--check`.
 - [ ] Panel y alerta de Grafana Cloud como código (provider de Terraform de Grafana); hoy se crean a mano.
-- [ ] `make check` con progreso visible (hoy `| tail` no muestra nada hasta el final).
 
 ## Copias de seguridad
 
@@ -138,3 +137,5 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       `restauracion.md`); en producción iría a un bucket S3 privado con versionado y bloqueo. (2026-10-14)
 - [x] `--tls-san` con el nombre de NetBird (`kubectl` por la VPN) y reinstalación de k3s solo cuando
       cambian la versión o los argumentos. (2026-10-14)
+- [x] `make check` con progreso visible y que falla si Ansible detecta cambios (caché de apt sin
+      contar como cambio). (2026-10-14)
