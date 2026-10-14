@@ -9,23 +9,7 @@ mismo código, unidos por una VPN en malla, con monitorización y copias de segu
 
 ## Arquitectura
 
-```mermaid
-flowchart LR
-    A[Repositorio Git] --> B[Terraform]
-    B -->|VMs, imagen y cloud-init| C[Proxmox VE]
-    B -->|red y VMs efímeras| AWS[AWS]
-    B -->|outputs| D[tf-to-inventory.sh]
-    D -->|inventario| E[Ansible]
-    S[(SOPS + age)] -.->|secretos| E
-    E -->|base, hardening, firewall, NetBird| F[VMs Debian 13]
-    E -->|instala| G[Clúster k3s]
-    E -->|instala y configura por API| W[Warpgate en core-01]
-    A -->|GitOps| H[Argo CD]
-    H -->|Traefik, Alloy y aplicaciones| G
-    W -.->|SSH con roles y grabación| F
-    G -->|métricas| GC[Grafana Cloud]
-    C -->|copias cifradas| PBS[Proxmox Backup Server]
-```
+![Flujo de la plataforma: del commit al clúster](docs/diagramas/plataforma-flujo.svg)
 
 | Capa | Herramienta | Función |
 |---|---|---|

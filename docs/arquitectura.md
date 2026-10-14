@@ -35,27 +35,7 @@ flowchart LR
 
 ## Topología
 
-```mermaid
-flowchart LR
-    subgraph casa[On-prem · LAN 192.168.1.0/24]
-        PVE[Proxmox VE<br/>ngtn-server .90]
-        CORE[core-01 .110<br/>Warpgate]
-        K3S[k3s-01 .101<br/>k3s · Argo CD · Alloy]
-        PBS[pbs-01 .91<br/>Proxmox Backup Server]
-        PVE --- CORE
-        PVE --- K3S
-        PVE -->|copias cifradas| PBS
-    end
-    subgraph aws[AWS · eu-south-2]
-        CLOUD[cloud-01<br/>efímera, sin puertos de entrada]
-    end
-    ADMIN[Equipo de administración]
-    ADMIN -.NetBird.-> CORE
-    ADMIN -.NetBird.-> K3S
-    ADMIN -.NetBird.-> CLOUD
-    K3S -->|métricas| GC[Grafana Cloud]
-    GC -->|alertas| TG[Telegram]
-```
+![Topología de red: casa (Proxmox) y AWS unidas por NetBird](diagramas/plataforma-topologia.svg)
 
 ## 1. Provisión: Terraform
 
