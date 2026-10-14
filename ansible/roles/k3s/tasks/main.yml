@@ -21,13 +21,32 @@
     dest: /usr/local/bin/k3s-install.sh
     mode: "0755"
 
+- name: Crear el directorio de configuración de k3s
+  ansible.builtin.file:
+    path: /etc/rancher/k3s
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+# Huella de la instalación: si cambian la versión o los argumentos, se vuelve a ejecutar el instalador
+# (actualiza el servicio y reinicia k3s; los datos del clúster en /var/lib/rancher se conservan)
+- name: Guardar la versión y los argumentos de instalación de k3s
+  ansible.builtin.copy:
+    dest: /etc/rancher/k3s/install-args
+    content: "{{ k3s_version }} server {{ k3s_server_args | join(' ') }}\n"
+    owner: root
+    group: root
+    mode: "0600"
+  register: k3s_install_args
+
 - name: Instalar k3s (servidor)
   ansible.builtin.command: /usr/local/bin/k3s-install.sh
   environment:
     INSTALL_K3S_VERSION: "{{ k3s_version }}"
     INSTALL_K3S_EXEC: "server {{ k3s_server_args | join(' ') }}"
-  when: k3s_version not in (k3s_installed.stdout | default(''))
-  changed_when: true  # solo se ejecuta si falta la versión (ver when)
+  when: k3s_version not in (k3s_installed.stdout | default('')) or k3s_install_args is changed
+  changed_when: true  # solo se ejecuta si cambia la versión o los argumentos (ver when)
 
 - name: Esperar a que el nodo esté Ready
   ansible.builtin.command: >
