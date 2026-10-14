@@ -3,6 +3,7 @@
   ansible.builtin.apt:
     update_cache: true
     cache_valid_time: 3600
+  changed_when: false  # refrescar la caché de apt no cambia la configuración del sistema
 
 - name: Instalar paquetes base
   ansible.builtin.apt:

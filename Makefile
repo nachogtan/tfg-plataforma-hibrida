@@ -25,6 +25,9 @@ endif
 
 TF         := $(TF_ENV) terraform -chdir=$(TF_DIR)
 
+# Salida resumida para check: nombre de cada tarea (progreso) y solo lo que cambia o falla
+ANSIBLE_QUIET := ANSIBLE_DISPLAY_OK_HOSTS=false ANSIBLE_DISPLAY_SKIPPED_HOSTS=false
+
 help: ## Muestra esta ayuda
 > @grep -E '^[a-z]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
 
@@ -55,9 +58,13 @@ deploy: $(DEPLOY) ## Despliegue completo (en onprem incluye GitOps)
 
 rebuild: destroy deploy ## Destruye y vuelve a crear el entorno
 
-check: ## Comprueba la idempotencia (Terraform y Ansible sin cambios)
+check: ## Comprueba que la infraestructura coincide con el código (falla si hay cambios)
 > $(TF) plan -detailed-exitcode
-> $(ANSIBLE) ansible-playbook $(INVENTORY) playbooks/site.yml | tail -n 3
+> @out=$$(mktemp); trap 'rm -f "$$out"' EXIT; \
+>  ( $(ANSIBLE) $(ANSIBLE_QUIET) ansible-playbook $(INVENTORY) playbooks/site.yml ) | tee "$$out"; \
+>  rc=$${PIPESTATUS[0]}; [ "$$rc" -eq 0 ] || exit "$$rc"; \
+>  if grep -Eq 'changed=[1-9]' "$$out"; then echo "ERROR: Ansible ha detectado cambios: la plataforma no coincide con el código"; exit 2; fi; \
+>  echo "OK: Terraform y Ansible sin cambios (idempotente)"
 
 status: ## Estado del clúster k3s (onprem)
 > KUBECONFIG=$$HOME/.kube/tfg-onprem.yaml kubectl get nodes,pods -A
