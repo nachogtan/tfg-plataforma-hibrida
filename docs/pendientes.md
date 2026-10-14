@@ -61,7 +61,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [ ] Vigilar la política `deny (routed)` de UFW al escalar a varios nodos y al publicar aplicaciones.
 - [ ] Renombrar los contextos del kubeconfig (`tfg-onprem`, `tfg-cloud`) cuando exista el clúster cloud.
 - [ ] Vigilar la RAM del nodo Proxmox (~1,2 GiB disponibles, medido el 2026-10-13) hasta ampliarlo a 32 GB.
-- [ ] Añadir `k3s-01.netbird.cloud` a `--tls-san` de k3s para usar `kubectl` por la VPN fuera de casa.
 - [ ] Métricas de Kubernetes (cAdvisor y kubelet) en Alloy, filtradas para no superar el plan Free.
 
 ## Automatización y comodidad
@@ -137,3 +136,5 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
 - [x] Revisión de la documentación: arquitectura, README, mapa y runbook de restauración. (2026-10-13)
 - [x] Estado de Terraform: se mantiene local por decisión documentada (ADR-0009 y escenario E de
       `restauracion.md`); en producción iría a un bucket S3 privado con versionado y bloqueo. (2026-10-14)
+- [x] `--tls-san` con el nombre de NetBird (`kubectl` por la VPN) y reinstalación de k3s solo cuando
+      cambian la versión o los argumentos. (2026-10-14)

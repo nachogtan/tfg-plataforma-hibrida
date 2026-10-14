@@ -69,6 +69,19 @@ netbird status | grep -E "Management|Peers count"                     # Connecte
 timeout 3 bash -c '</dev/tcp/k3s-01.netbird.cloud/22' && echo abierto  # permitido por la política
 ```
 
+## Administrar desde fuera de casa
+
+La política `admin-a-onprem` permite llegar por la malla a SSH, la API de Kubernetes (6443) y los
+servicios web. Fuera de la LAN se usan los nombres de NetBird en lugar de las IPs:
+
+```bash
+# Ansible: conectar a cada VM por su nombre en la malla
+(cd ansible && ansible-playbook -i inventories/onprem playbooks/site.yml -e 'ansible_host={{ inventory_hostname }}.netbird.cloud')
+
+# kubectl: el certificado de la API incluye k3s-01.netbird.cloud (rol k3s, --tls-san)
+KUBECONFIG=$HOME/.kube/tfg-onprem.yaml kubectl --server https://k3s-01.netbird.cloud:6443 get nodes
+```
+
 ## Problemas frecuentes
 
 | Síntoma | Causa | Solución |
