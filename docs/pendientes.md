@@ -35,7 +35,6 @@ Al completar una, se marca con `[x]` y se indica la fecha o el PR.
       con certificados válidos emitidos por cert-manager.
 - [ ] Gestionar IAM Identity Center (usuario, conjuntos de permisos y política `TFG-Terraform`)
       con Terraform; hoy se crearon en la consola.
-- [ ] Desactivar y borrar las claves de acceso permanentes del usuario IAM `admin-ngtn`.
 - [ ] Sacar la setup key de NetBird del `user_data` de las VMs cloud (por ejemplo, leerla de
       SSM Parameter Store con un rol IAM de la instancia).
 - [ ] Rotar el token de Grafana Cloud (caduca a los 90 días; ver [monitorizacion](runbooks/monitorizacion.md)).
