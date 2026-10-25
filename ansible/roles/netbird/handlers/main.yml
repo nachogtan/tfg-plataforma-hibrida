@@ -1,0 +1,4 @@
+---
+- name: Actualizar la caché de APT
+  ansible.builtin.apt:
+    update_cache: true

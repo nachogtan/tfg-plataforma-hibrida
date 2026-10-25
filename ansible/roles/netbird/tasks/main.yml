@@ -16,6 +16,10 @@
     suites: stable
     components: main
     signed_by: "{{ netbird_apt_key_path }}"
+  notify: Actualizar la caché de APT
+
+- name: Aplicar la actualización de caché pendiente antes de instalar
+  ansible.builtin.meta: flush_handlers
 
 - name: Instalar el cliente de NetBird (versión fijada)
   ansible.builtin.apt:
