@@ -1,4 +1,4 @@
-# Aplicación de demostración: servidor whoami con 2 réplicas
+# Aplicación de demostración: servidor whoami
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,7 +6,7 @@ metadata:
   labels:
     app: demo-app
 spec:
-  replicas: 3
+  replicas: 4
   selector:
     matchLabels:
       app: demo-app
